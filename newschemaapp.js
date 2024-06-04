@@ -469,7 +469,7 @@
     var apiUrl =
       "https://skillcorner.com/api/physical/?data_version=3&" +
       queryString.slice(1) + // Remove leading "&" if present
-      "&average=false&token=" +
+      "&group_by=&token=" +
       token;
 
     console.log("Physical Data API URL:", apiUrl); // Log the API URL for debugging
