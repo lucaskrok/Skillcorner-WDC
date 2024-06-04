@@ -465,10 +465,10 @@
     if (parameterValues.match) queryString += "&match=" + parameterValues.match;
     if (parameterValues.team) queryString += "&team=" + parameterValues.team;
 
-    // Construct the complete API URL for physical data
+    // Remove leading "&" if present and construct the complete API URL for physical data
     var apiUrl =
-      "'https://skillcorner.com/api/physical/?data_version=3" +
-      queryString.slice(1) + // Remove leading "&" if present
+      "https://skillcorner.com/api/physical/?data_version=3" +
+      (queryString ? queryString : "") + // Only add queryString if it's not empty
       "&group_by=&token=" +
       token;
 
