@@ -467,7 +467,7 @@
 
     // Construct the complete API URL for physical data
     var apiUrl =
-      "https://skillcorner.com/api/physical/?dataversion=3&" +
+      "https://skillcorner.com/api/physical/?data_version=3&" +
       queryString.slice(1) + // Remove leading "&" if present
       "&average=false&token=" +
       token;
