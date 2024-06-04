@@ -111,7 +111,7 @@
 
     var apiUrl =
       "https://skillcorner.com/api/physical/?data_version=3" +
-      (queryString ? queryString : "") + // Only add queryString if it's not empty
+      (queryString ? queryString : "") +
       "&group_by=&token=" +
       token;
 
@@ -123,6 +123,7 @@
       dataType: "json",
       success: function (data) {
         var tableData = [];
+        console.log("Data received:", data);
 
         data.forEach(function (record) {
           tableData.push({
@@ -138,7 +139,8 @@
       },
       error: function (xhr, textStatus, errorThrown) {
         console.error(
-          "Error while fetching physical data: " + textStatus,
+          "Error while fetching physical data:",
+          textStatus,
           errorThrown
         );
         tableau.abortWithError(
@@ -161,6 +163,7 @@
       dataType: "json",
       success: function (data) {
         var tableData = [];
+        console.log("Competition Editions Data received:", data);
 
         data.results.forEach(function (record) {
           tableData.push({
@@ -183,7 +186,8 @@
       },
       error: function (xhr, textStatus, errorThrown) {
         console.error(
-          "Error while fetching competition editions data: " + textStatus,
+          "Error while fetching competition editions data:",
+          textStatus,
           errorThrown
         );
         tableau.abortWithError(
