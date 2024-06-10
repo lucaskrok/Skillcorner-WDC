@@ -3,8 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>FPL API WDC</title>
-    <link rel="stylesheet" href="style.css" />
+    <title>Skillcorner API WDC</title>
+    <link rel="stylesheet" href="styles.css" />
     <script
       src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"
       type="text/javascript"
@@ -16,55 +16,67 @@
   </head>
   <body>
     <header>
-      <h1>Get the data</h1>
+      <h1>Skillcorner Data Fetcher</h1>
     </header>
     <main>
       <form id="dataForm">
-        <label for="match">Match:</label>
-        <input
-          type="number"
-          id="match"
-          name="match"
-          placeholder="Enter match ID(s)"
-        />
-        <label for="team">Team:</label>
-        <input
-          type="number"
-          id="team"
-          name="team"
-          placeholder="Enter team ID(s)"
-        />
-        <label for="season">Season:</label>
-        <input
-          type="number"
-          id="season"
-          name="season"
-          placeholder="Enter season ID(s)"
-        />
-        <label for="competition">Competition:</label>
-        <input
-          type="number"
-          id="competition"
-          name="competition"
-          placeholder="Enter competition ID(s)"
-        />
-        <select id="group_by" name="group_by">
-          <option value="player">Player</option>
-          <option value="match">Match</option>
-          <option value="team">Team</option>
-          <option value="position_group">Position Group</option>
-          <option value="position">Position</option>
-          <option value="season">Season</option>
-          <option value="competition">Competition</option></select
-        ><br />
-
-        <label for="token">API Token:</label>
-        <input
-          type="text"
-          id="token"
-          name="token"
-          placeholder="Enter API token"
-        />
+        <div class="form-group">
+          <label for="match">Match:</label>
+          <input
+            type="number"
+            id="match"
+            name="match"
+            placeholder="Enter match ID(s)"
+          />
+        </div>
+        <div class="form-group">
+          <label for="team">Team:</label>
+          <input
+            type="number"
+            id="team"
+            name="team"
+            placeholder="Enter team ID(s)"
+          />
+        </div>
+        <div class="form-group">
+          <label for="season">Season:</label>
+          <input
+            type="number"
+            id="season"
+            name="season"
+            placeholder="Enter season ID(s)"
+          />
+        </div>
+        <div class="form-group">
+          <label for="competition">Competition:</label>
+          <input
+            type="number"
+            id="competition"
+            name="competition"
+            placeholder="Enter competition ID(s)"
+          />
+        </div>
+        <div class="form-group">
+          <label for="group_by">Group By:</label>
+          <select id="group_by" name="group_by">
+            <option value="player">Player</option>
+            <option value="match">Match</option>
+            <option value="team">Team</option>
+            <option value="position_group">Position Group</option>
+            <option value="position">Position</option>
+            <option value="season">Season</option>
+            <option value="competition">Competition</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="token">API Token:</label>
+          <input
+            type="text"
+            id="token"
+            name="token"
+            placeholder="Enter API token"
+          />
+        </div>
         <button type="submit" id="getData">Click here to get data!</button>
       </form>
     </main>
