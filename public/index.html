@@ -16,70 +16,69 @@
   </head>
   <body>
     <header>
-      <h1>Skillcorner Data Fetcher</h1>
+      <h1>Skillcorner Web Data Connector</h1>
     </header>
     <main>
       <form id="dataForm">
         <div class="form-group">
-          <label for="match">Match:</label>
+          <label for="match-parameter">Match:</label>
           <input
             type="number"
-            id="match"
+            id="match-parameter"
             name="match"
             placeholder="Enter match ID(s)"
           />
         </div>
         <div class="form-group">
-          <label for="team">Team:</label>
+          <label for="team-parameter">Team:</label>
           <input
             type="number"
-            id="team"
+            id="team-parameter"
             name="team"
             placeholder="Enter team ID(s)"
           />
         </div>
         <div class="form-group">
-          <label for="season">Season:</label>
+          <label for="competition_edition-parameter"
+            >Competition Edition:</label
+          >
           <input
             type="number"
-            id="season"
+            id="competition_edition-parameter"
+            name="competition_edition"
+            placeholder="Enter Competition Edition ID"
+          />
+        </div>
+        <div class="form-group">
+          <label for="season-parameter">Season:</label>
+          <input
+            type="number"
+            id="season-parameter"
             name="season"
             placeholder="Enter season ID(s)"
           />
         </div>
         <div class="form-group">
-          <label for="competition">Competition:</label>
+          <label for="competition-parameter">Competition:</label>
           <input
             type="number"
-            id="competition"
+            id="competition-parameter"
             name="competition"
             placeholder="Enter competition ID(s)"
           />
         </div>
         <div class="form-group">
-          <label for="group_by">Group By:</label>
-          <select id="group_by" name="group_by">
-            <option value="player">Player</option>
-            <option value="match">Match</option>
-            <option value="team">Team</option>
-            <option value="position_group">Position Group</option>
-            <option value="position">Position</option>
-            <option value="season">Season</option>
-            <option value="competition">Competition</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="token">API Token:</label>
+          <label for="api-token">API Token:</label>
           <input
             type="text"
-            id="token"
+            id="api-token"
             name="token"
             placeholder="Enter API token"
           />
         </div>
-        <button type="submit" id="getData">Click here to get data!</button>
+        <button type="button" id="submitButton">Click here to get data!</button>
       </form>
     </main>
-    <script src="./test2.js"></script>
+    <script src="./test3.js"></script>
   </body>
 </html>

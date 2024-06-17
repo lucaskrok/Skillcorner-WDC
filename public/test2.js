@@ -455,9 +455,9 @@
 
     // Construct the complete API URL for physical data
     var apiUrl =
-      "https://skillcorner.com/api/physical/?data_version=3&" +
+      "https://skillcorner.com/api/physical/?data_version=3&physical_check_passed=true&" +
       queryString.slice(1) + // Remove leading "&" if present
-      "&token=" +
+      "&group_by=player,match&token=" +
       token;
 
     console.log("Physical Data API URL:", apiUrl);
@@ -624,7 +624,6 @@
       var competition = $("#competition").val().trim();
       var match = $("#match").val().trim();
       var team = $("#team").val().trim();
-      var group_by = $("#group_by").val().trim();
 
       var token = $("#token").val();
 
