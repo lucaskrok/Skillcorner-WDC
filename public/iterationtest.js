@@ -2,7 +2,7 @@
   var myConnector = tableau.makeConnector();
 
   myConnector.getSchema = function (schemaCallback) {
-    var cols = [
+    var physicalDataCols = [
       { id: "player_name", dataType: tableau.dataTypeEnum.string },
       { id: "player_short_name", dataType: tableau.dataTypeEnum.string },
       { id: "player_id", dataType: tableau.dataTypeEnum.int },
@@ -40,19 +40,66 @@
       { id: "psv99", dataType: tableau.dataTypeEnum.float },
     ];
 
-    var tableSchema = {
-      id: "skillcornerPhysicalData",
-      alias: "Skillcorner Physical Data",
-      columns: cols,
+    var physicalDataTableSchema = {
+      id: "physicalData",
+      alias: "Physical Data",
+      columns: physicalDataCols,
     };
 
-    schemaCallback([tableSchema]);
+    var competitionEditionsCols = [
+      { id: "id", dataType: tableau.dataTypeEnum.int },
+      { id: "competition_id", dataType: tableau.dataTypeEnum.int },
+      { id: "competition_area", dataType: tableau.dataTypeEnum.string },
+      { id: "competition_name", dataType: tableau.dataTypeEnum.string },
+      { id: "competition_gender", dataType: tableau.dataTypeEnum.string },
+      { id: "competition_age_group", dataType: tableau.dataTypeEnum.string },
+      { id: "season_id", dataType: tableau.dataTypeEnum.int },
+      { id: "season_start_year", dataType: tableau.dataTypeEnum.int },
+      { id: "season_end_year", dataType: tableau.dataTypeEnum.int },
+      { id: "season_name", dataType: tableau.dataTypeEnum.string },
+      { id: "name", dataType: tableau.dataTypeEnum.string },
+    ];
+
+    var competitionEditionsTableSchema = {
+      id: "competitionEditionsData",
+      alias: "Competition Editions Data",
+      columns: competitionEditionsCols,
+    };
+
+    schemaCallback([physicalDataTableSchema, competitionEditionsTableSchema]);
   };
 
   myConnector.getData = function (table, doneCallback) {
     var connectionData = JSON.parse(tableau.connectionData);
     var parameterValues = connectionData.parameters;
     var token = connectionData.token;
+
+    if (table.tableInfo.id === "physicalData") {
+      fetchPhysicalData(table, parameterValues, token, doneCallback);
+    } else if (table.tableInfo.id === "competitionEditionsData") {
+      fetchCompetitionEditionsData(table, token, doneCallback);
+    }
+  };
+
+  function fetchPhysicalData(table, parameterValues, token, doneCallback) {
+    var queryString = "";
+    if (parameterValues.season)
+      queryString += "&season=" + parameterValues.season;
+    if (parameterValues.competition)
+      queryString += "&competition=" + parameterValues.competition;
+    if (parameterValues.match) queryString += "&match=" + parameterValues.match;
+    if (parameterValues.team) queryString += "&team=" + parameterValues.team;
+    if (parameterValues.competition_edition)
+      queryString +=
+        "&competition_edition=" + parameterValues.competition_edition;
+
+    var apiUrl =
+      "https://skillcorner.com/api/physical/?data_version=3&physical_check_passed=true&" +
+      queryString.slice(1) +
+      "&group_by=player,match&average_per=match&token=" +
+      token;
+
+    console.log("Physical Data API URL:", apiUrl);
 
     function fetchData(url) {
       $.ajax({
@@ -122,44 +169,74 @@
       });
     }
 
-    var queryString = "";
-    if (parameterValues.season)
-      queryString += "&season=" + parameterValues.season;
-    if (parameterValues.competition)
-      queryString += "&competition=" + parameterValues.competition;
-    if (parameterValues.match) queryString += "&match=" + parameterValues.match;
-    if (parameterValues.team) queryString += "&team=" + parameterValues.team;
-    if (parameterValues.competition_edition)
-      queryString +=
-        "&competition_edition=" + parameterValues.competition_edition;
-
-    var apiUrl =
-      "https://skillcorner.com/api/physical/?data_version=3&physical_check_passed=true&" +
-      queryString.slice(1) +
-      "&group_by=player,match&average_per=match&token=" +
-      token;
-
-    console.log("Physical Data API URL:", apiUrl);
-
     fetchData(apiUrl);
-  };
+  }
+
+  function fetchCompetitionEditionsData(table, token, doneCallback) {
+    var apiUrl =
+      "https://skillcorner.com/api/competition_editions/?token=" + token;
+
+    console.log("Competition Editions Data API URL:", apiUrl);
+
+    $.ajax({
+      url: apiUrl,
+      type: "GET",
+      dataType: "json",
+      success: function (data) {
+        var tableData = [];
+        console.log("Data received:", data);
+
+        data.results.forEach(function (record) {
+          tableData.push({
+            id: record.id,
+            competition_id: record.competition_id,
+            competition_area: record.competition_area,
+            competition_name: record.competition_name,
+            competition_gender: record.competition_gender,
+            competition_age_group: record.competition_age_group,
+            season_id: record.season_id,
+            season_start_year: record.season_start_year,
+            season_end_year: record.season_end_year,
+            season_name: record.season_name,
+            name: record.name,
+          });
+        });
+
+        table.appendRows(tableData);
+        doneCallback();
+      },
+      error: function (xhr, textStatus, errorThrown) {
+        console.error(
+          "Error while fetching competition editions data:",
+          textStatus,
+          errorThrown
+        );
+        tableau.abortWithError(
+          "Failed to get competition editions data from SkillCorner API"
+        );
+      },
+    });
+  }
 
   tableau.registerConnector(myConnector);
 
   $(document).ready(function () {
     $("#submitButton").click(function () {
-      var connectionData = {
-        parameters: {
-          season: $("#season-parameter").val().trim(),
-          competition: $("#competition-parameter").val().trim(),
-          match: $("#match-parameter").val().trim(),
-          team: $("#team-parameter").val().trim(),
-          competition_edition: $("#competition_edition-parameter").val().trim(),
-        },
-        token: $("#api-token").val().trim(),
+      var parameterValues = {
+        season: $("#season").val().trim(),
+        competition: $("#competition").val().trim(),
+        match: $("#match").val().trim(),
+        team: $("#team").val().trim(),
+        competition_edition: $("#competition_edition").val().trim(),
       };
 
-      tableau.connectionData = JSON.stringify(connectionData);
+      var token = $("#token").val().trim();
+
+      tableau.connectionData = JSON.stringify({
+        parameters: parameterValues,
+        token: token,
+      });
+
       tableau.connectionName = "SkillCorner Physical Data";
       tableau.submit();
     });
