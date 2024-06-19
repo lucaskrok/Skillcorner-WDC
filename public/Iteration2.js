@@ -3,6 +3,7 @@
 
   myConnector.getSchema = function (schemaCallback) {
     var physicalDataCols = [
+      // Define schema columns
       { id: "player_name", dataType: tableau.dataTypeEnum.string },
       { id: "player_short_name", dataType: tableau.dataTypeEnum.string },
       { id: "player_id", dataType: tableau.dataTypeEnum.int },
@@ -101,14 +102,17 @@
 
     console.log("Physical Data API URL:", apiUrl);
 
-    function fetchData(url) {
+    function fetchData(url, pageCount) {
       $.ajax({
         url: url,
         type: "GET",
         dataType: "json",
         success: function (data) {
           var tableData = [];
-          console.log("Data received:", data);
+          console.log(
+            `Data received for page ${pageCount}:`,
+            data.results.length
+          );
 
           data.results.forEach(function (record) {
             tableData.push({
@@ -151,14 +155,16 @@
           table.appendRows(tableData);
 
           if (data.next) {
-            fetchData(data.next);
+            console.log("Fetching next page:", data.next);
+            fetchData(data.next, pageCount + 1);
           } else {
+            console.log("All pages fetched");
             doneCallback();
           }
         },
         error: function (xhr, textStatus, errorThrown) {
           console.error(
-            "Error while fetching physical data:",
+            `Error while fetching data on page ${pageCount}:`,
             textStatus,
             errorThrown
           );
@@ -169,7 +175,7 @@
       });
     }
 
-    fetchData(apiUrl);
+    fetchData(apiUrl, 1);
   }
 
   function fetchCompetitionEditionsData(table, token, doneCallback) {
@@ -177,15 +183,13 @@
       "https://skillcorner.com/api/competition_editions/?user=true&token=" +
       token;
 
-    console.log("Competition Editions API URL:", apiUrl);
-
     $.ajax({
       url: apiUrl,
       type: "GET",
       dataType: "json",
       success: function (data) {
         var tableData = [];
-        console.log("Competition Editions Data received:", data);
+        console.log("Competition Editions Data received:", data.results.length);
 
         data.results.forEach(function (record) {
           tableData.push({
@@ -204,20 +208,19 @@
         });
 
         table.appendRows(tableData);
-        doneCallback(); // Call doneCallback once all data is appended
+        doneCallback();
       },
-      error: function (xhr, ajaxOptions, thrownError) {
+      error: function (xhr, textStatus, errorThrown) {
         console.error(
           "Error while fetching competition editions data:",
-          thrownError
+          textStatus,
+          errorThrown
         );
         tableau.abortWithError(
           "Failed to get competition editions data from SkillCorner API"
         );
       },
     });
-
-    fetchData(apiUrl);
   }
 
   tableau.registerConnector(myConnector);
