@@ -4,11 +4,14 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Skillcorner API WDC</title>
+    <!-- Link to external CSS file for styling -->
     <link rel="stylesheet" href="style.css" />
+    <!-- Load jQuery library from a CDN -->
     <script
       src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"
       type="text/javascript"
     ></script>
+    <!-- Load Tableau Web Data Connector library from Tableau's CDN -->
     <script
       src="https://connectors.tableau.com/libs/tableauwdc-2.4.latest.js"
       type="text/javascript"
@@ -16,10 +19,34 @@
   </head>
   <body>
     <header>
+      <!-- Header section with the title of the page -->
       <h1>Skillcorner Web Data Connector</h1>
     </header>
     <main>
       <form id="dataForm">
+        <!-- Form group for username input -->
+        <div class="form-group">
+          <label for="username">Username:</label>
+          <input
+            type="text"
+            id="username"
+            name="username"
+            placeholder="Enter your username"
+            required
+          />
+        </div>
+        <!-- Form group for password input -->
+        <div class="form-group">
+          <label for="password">Password:</label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            placeholder="Enter your password"
+            required
+          />
+        </div>
+        <!-- Form group for match parameter input -->
         <div class="form-group">
           <label for="match-parameter">Match:</label>
           <input
@@ -29,6 +56,7 @@
             placeholder="Enter match ID(s), separated by commas"
           />
         </div>
+        <!-- Form group for team parameter input -->
         <div class="form-group">
           <label for="team-parameter">Team:</label>
           <input
@@ -38,6 +66,7 @@
             placeholder="Enter team ID(s), separated by commas"
           />
         </div>
+        <!-- Form group for competition edition parameter input -->
         <div class="form-group">
           <label for="competition_edition-parameter"
             >Competition Edition:</label
@@ -46,9 +75,10 @@
             type="text"
             id="competition_edition-parameter"
             name="competition_edition"
-            placeholder="Enter Competition Edition ID, separated by commas"
+            placeholder="Enter Competition Edition ID(s), separated by commas"
           />
         </div>
+        <!-- Form group for season parameter input -->
         <div class="form-group">
           <label for="season-parameter">Season:</label>
           <input
@@ -58,6 +88,7 @@
             placeholder="Enter season ID(s), separated by commas"
           />
         </div>
+        <!-- Form group for competition parameter input -->
         <div class="form-group">
           <label for="competition-parameter">Competition:</label>
           <input
@@ -67,18 +98,11 @@
             placeholder="Enter competition ID(s), separated by commas"
           />
         </div>
-        <div class="form-group">
-          <label for="api-token">API Token:</label>
-          <input
-            type="text"
-            id="api-token"
-            name="token"
-            placeholder="Enter API token"
-          />
-        </div>
+        <!-- Submit button to fetch data based on the input parameters -->
         <button type="button" id="submitButton">Click here to get data!</button>
       </form>
     </main>
-    <script src="./Iteration2.js"></script>
+    <!-- Link to the external JavaScript file containing the WDC logic -->
+    <script src="./test2.js"></script>
   </body>
 </html>

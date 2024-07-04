@@ -1,9 +1,11 @@
 (function () {
+  // Create a new Web Data Connector (WDC) object
   var myConnector = tableau.makeConnector();
 
+  // Define the schema for the data tables
   myConnector.getSchema = function (schemaCallback) {
+    // Columns for the 'physicalData' table
     var physicalDataCols = [
-      // Define schema columns
       { id: "player_name", dataType: tableau.dataTypeEnum.string },
       { id: "player_short_name", dataType: tableau.dataTypeEnum.string },
       { id: "player_id", dataType: tableau.dataTypeEnum.int },
@@ -41,12 +43,14 @@
       { id: "psv99", dataType: tableau.dataTypeEnum.float },
     ];
 
+    // Schema definition for the 'physicalData' table
     var physicalDataTableSchema = {
       id: "physicalData",
       alias: "Physical Data",
       columns: physicalDataCols,
     };
 
+    // Columns for the 'competitionEditionsData' table
     var competitionEditionsCols = [
       { id: "id", dataType: tableau.dataTypeEnum.int },
       { id: "competition_id", dataType: tableau.dataTypeEnum.int },
@@ -61,28 +65,37 @@
       { id: "name", dataType: tableau.dataTypeEnum.string },
     ];
 
+    // Schema definition for the 'competitionEditionsData' table
     var competitionEditionsTableSchema = {
       id: "competitionEditionsData",
       alias: "Competition Editions Data",
       columns: competitionEditionsCols,
     };
 
+    // Provide the schema definitions to Tableau
     schemaCallback([physicalDataTableSchema, competitionEditionsTableSchema]);
   };
 
+  // Fetch data for the tables based on the schema
   myConnector.getData = function (table, doneCallback) {
+    // Parse connection data
     var connectionData = JSON.parse(tableau.connectionData);
     var parameterValues = connectionData.parameters;
     var token = connectionData.token;
 
+    // Fetch data for the 'physicalData' table
     if (table.tableInfo.id === "physicalData") {
       fetchPhysicalData(table, parameterValues, token, doneCallback);
-    } else if (table.tableInfo.id === "competitionEditionsData") {
+    }
+    // Fetch data for the 'competitionEditionsData' table
+    else if (table.tableInfo.id === "competitionEditionsData") {
       fetchCompetitionEditionsData(table, token, doneCallback);
     }
   };
 
+  // Function to fetch physical data from the API
   function fetchPhysicalData(table, parameterValues, token, doneCallback) {
+    // Build query string from parameters
     var queryString = "";
     if (parameterValues.season)
       queryString += "&season=" + parameterValues.season;
@@ -94,6 +107,7 @@
       queryString +=
         "&competition_edition=" + parameterValues.competition_edition;
 
+    // Construct the API URL
     var apiUrl =
       "https://skillcorner.com/api/physical/?data_version=3&physical_check_passed=true&" +
       queryString.slice(1) +
@@ -102,19 +116,23 @@
 
     console.log("Physical Data API URL:", apiUrl);
 
+    // Recursive function to fetch paginated data from the API
     function fetchData(url, pageCount) {
       $.ajax({
-        url: url,
-        type: "GET",
-        dataType: "json",
+        url: url, // The URL to request data from
+        type: "GET", // HTTP method to use
+        dataType: "json", // The type of data expected back from the server
         success: function (data) {
+          // Function to run if the request succeeds
           var tableData = [];
           console.log(
             `Data received for page ${pageCount}:`,
             data.results.length
           );
 
+          // Process each record in the data
           data.results.forEach(function (record) {
+            // Create a structured data object for each record
             tableData.push({
               player_name: record.player_name,
               player_short_name: record.player_short_name,
@@ -152,10 +170,13 @@
             });
           });
 
+          // Append rows to the table
           table.appendRows(tableData);
 
+          // If there is a next page, fetch it
           if (data.next) {
             console.log("Fetching next page:", data.next);
+            // Recursive call to fetch the next page of data
             fetchData(data.next, pageCount + 1);
           } else {
             console.log("All pages fetched");
@@ -175,10 +196,13 @@
       });
     }
 
+    // Initial data fetch call
     fetchData(apiUrl, 1);
   }
 
+  // Function to fetch competition editions data from the API
   function fetchCompetitionEditionsData(table, token, doneCallback) {
+    // Construct the API URL
     var apiUrl =
       "https://skillcorner.com/api/competition_editions/?user=true&token=" +
       token;
@@ -191,6 +215,7 @@
         var tableData = [];
         console.log("Competition Editions Data received:", data.results.length);
 
+        // Process each record in the data
         data.results.forEach(function (record) {
           tableData.push({
             id: record.id,
@@ -207,6 +232,7 @@
           });
         });
 
+        // Append rows to the table
         table.appendRows(tableData);
         doneCallback();
       },
@@ -223,10 +249,13 @@
     });
   }
 
+  // Register the connector with Tableau
   tableau.registerConnector(myConnector);
 
+  // jQuery function to handle the submit button click event
   $(document).ready(function () {
     $("#submitButton").click(function () {
+      // Create connection data object from user inputs
       var connectionData = {
         parameters: {
           season: $("#season-parameter").val().trim(),
@@ -238,6 +267,7 @@
         token: $("#api-token").val().trim(),
       };
 
+      // Set connection data and name, then submit
       tableau.connectionData = JSON.stringify(connectionData);
       tableau.connectionName = "SkillCorner Data";
       tableau.submit();
