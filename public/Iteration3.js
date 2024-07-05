@@ -111,7 +111,7 @@
     var apiUrl =
       "https://skillcorner.com/api/physical/?data_version=3&physical_check_passed=true&" +
       queryString.slice(1) +
-      "&group_by=player,match&average_per=match&token=677560e21c8bb595c4b6" +
+      "&group_by=player,match&average_per=match&token=" +
       token;
 
     console.log("Physical Data API URL:", apiUrl);
@@ -204,7 +204,7 @@
   function fetchCompetitionEditionsData(table, token, doneCallback) {
     // Construct the API URL
     var apiUrl =
-      "https://skillcorner.com/api/competition_editions/?user=true&token=677560e21c8bb595c4b6" +
+      "https://skillcorner.com/api/competition_editions/?user=true&token=" +
       token;
 
     $.ajax({
@@ -264,6 +264,7 @@
           team: $("#team-parameter").val().trim(),
           competition_edition: $("#competition_edition-parameter").val().trim(),
         },
+        token: $("677560e21c8bb595c4b6").val().trim(),
       };
 
       // Set connection data and name, then submit
