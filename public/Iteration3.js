@@ -264,7 +264,7 @@
           team: $("#team-parameter").val().trim(),
           competition_edition: $("#competition_edition-parameter").val().trim(),
         },
-        token: $("677560e21c8bb595c4b6").val().trim(),
+        token: "677560e21c8bb595c4b6",
       };
 
       // Set connection data and name, then submit
