@@ -113,12 +113,11 @@
       queryString +=
         "&competition_edition=" + parameterValues.competition_edition;
 
-    // Construct the API URL with the token appended
+    // Construct the API URL without the token appended
     var apiUrl =
-      "https://skillcorner.com/api/physical/?data_version=3&physical_check_passed=true&" +
-      queryString.slice(1) +
-      "&group_by=player,match&average_per=match&token=" +
-      token;
+      "https://skillcorner.com/api/physical/?data_version=3&physical_check_passed=true" +
+      queryString +
+      "&group_by=player,match&average_per=match";
 
     console.log("Physical Data API URL:", apiUrl);
 
@@ -128,6 +127,13 @@
         url: url, // The URL to request data from
         type: "GET", // HTTP method to use
         dataType: "json", // The type of data expected back from the server
+        beforeSend: function (xhr) {
+          // Setting Basic Auth headers
+          xhr.setRequestHeader(
+            "Authorization",
+            "Basic " + btoa(tableau.username + ":" + tableau.password)
+          );
+        },
         success: function (data) {
           // Function to run if the request succeeds
           var tableData = [];
@@ -218,7 +224,7 @@
       beforeSend: function (xhr) {
         xhr.setRequestHeader(
           "Authorization",
-          "Basic " + btoa(token + ":") // Set basic auth header with token
+          "Basic " + btoa(tableau.username + ":" + tableau.password)
         );
       },
       success: function (data) {
@@ -274,7 +280,8 @@
           team: $("#team-parameter").val().trim(),
           competition_edition: $("#competition_edition-parameter").val().trim(),
         },
-        token: $("#token-input").val().trim(), // Get the token from input field
+        username: $("#username").val().trim(), // Assuming an input field for username
+        password: $("#password").val().trim(), // Assuming an input field for password
       };
 
       // Set connection data and name, then submit
