@@ -2,6 +2,12 @@
   // Create a new Web Data Connector (WDC) object
   var myConnector = tableau.makeConnector();
 
+  // Initialize function to set auth type and initialize the connector
+  myConnector.init = function (initCallback) {
+    tableau.authType = tableau.authTypeEnum.basic; // Set auth type to basic
+    initCallback();
+  };
+
   // Define the schema for the data tables
   myConnector.getSchema = function (schemaCallback) {
     // Columns for the 'physicalData' table
@@ -107,7 +113,7 @@
       queryString +=
         "&competition_edition=" + parameterValues.competition_edition;
 
-    // Construct the API URL
+    // Construct the API URL with the token appended
     var apiUrl =
       "https://skillcorner.com/api/physical/?data_version=3&physical_check_passed=true&" +
       queryString.slice(1) +
@@ -203,14 +209,18 @@
   // Function to fetch competition editions data from the API
   function fetchCompetitionEditionsData(table, token, doneCallback) {
     // Construct the API URL
-    var apiUrl =
-      "https://skillcorner.com/api/competition_editions/?user=true&token=" +
-      token;
+    var apiUrl = "https://skillcorner.com/api/competition_editions/?user=true";
 
     $.ajax({
       url: apiUrl,
       type: "GET",
       dataType: "json",
+      beforeSend: function (xhr) {
+        xhr.setRequestHeader(
+          "Authorization",
+          "Basic " + btoa(token + ":") // Set basic auth header with token
+        );
+      },
       success: function (data) {
         var tableData = [];
         console.log("Competition Editions Data received:", data.results.length);
@@ -264,7 +274,7 @@
           team: $("#team-parameter").val().trim(),
           competition_edition: $("#competition_edition-parameter").val().trim(),
         },
-        token: $("#api-token").val().trim(),
+        token: $("#token-input").val().trim(), // Get the token from input field
       };
 
       // Set connection data and name, then submit
