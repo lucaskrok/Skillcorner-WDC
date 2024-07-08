@@ -193,7 +193,6 @@
             psv99: record.psv99,
           });
         });
-
         // Append data to Tableau
         table.appendRows(tableData);
         doneCallback();
@@ -229,15 +228,15 @@
         data.results.forEach(function (record) {
           tableData.push({
             id: record.id,
-            competition_id: record.competition.id,
-            competition_area: record.competition.area,
-            competition_name: record.competition.name,
-            competition_gender: record.competition.gender,
-            competition_age_group: record.competition.age_group,
-            season_id: record.season.id,
-            season_start_year: record.season.start_year,
-            season_end_year: record.season.end_year,
-            season_name: record.season.name,
+            competition_id: record.competition_id,
+            competition_area: record.competition_area,
+            competition_name: record.competition_name,
+            competition_gender: record.competition_gender,
+            competition_age_group: record.competition_age_group,
+            season_id: record.season_id,
+            season_start_year: record.season_start_year,
+            season_end_year: record.season_end_year,
+            season_name: record.season_name,
             name: record.name,
           });
         });
@@ -283,5 +282,10 @@
       tableau.connectionName = "SkillCorner Data";
       tableau.submit();
     });
+  });
+
+  // Initiate the Tableau connector
+  $(document).ready(function () {
+    tableau.initCallback();
   });
 })();

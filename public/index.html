@@ -80,26 +80,30 @@
 
         // Handle submit button click
         $("#submitButton").click(function () {
-          // Fetch data based on user inputs
-          var parameters = {
-            season: $("#season-parameter").val().trim(),
-            competition: $("#competition-parameter").val().trim(),
-            match: $("#match-parameter").val().trim(),
-            team: $("#team-parameter").val().trim(),
-            competition_edition: $("#competition_edition-parameter")
-              .val()
-              .trim(),
+          // Create connection data object from user inputs
+          var connectionData = {
+            parameters: {
+              season: $("#season-parameter").val().trim(),
+              competition: $("#competition-parameter").val().trim(),
+              match: $("#match-parameter").val().trim(),
+              team: $("#team-parameter").val().trim(),
+              competition_edition: $("#competition_edition-parameter")
+                .val()
+                .trim(),
+            },
+            username: $("#username").val().trim(),
+            password: $("#password").val().trim(),
           };
 
-          tableau.connectionData = JSON.stringify(parameters);
-
-          // Start Tableau WDC process
+          // Set connection data and name, then submit
+          tableau.connectionData = JSON.stringify(connectionData);
+          tableau.connectionName = "SkillCorner Data";
           tableau.submit();
         });
       });
     </script>
 
-    <!-- Include your JavaScript file -->
+    <!-- Include your JavaScript file for the Tableau WDC -->
     <script src="./Iteration2.js"></script>
   </body>
 </html>
