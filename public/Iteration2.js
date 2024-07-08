@@ -84,144 +84,42 @@
 
   // Fetch data for the tables based on the schema
   myConnector.getData = function (table, doneCallback) {
-    // Parse connection data
     var connectionData = JSON.parse(tableau.connectionData);
-    var parameterValues = connectionData.parameters;
-    var token = connectionData.token;
+    var parameters = connectionData.parameters;
 
-    // Fetch data for the 'physicalData' table
     if (table.tableInfo.id === "physicalData") {
-      fetchPhysicalData(table, parameterValues, token, doneCallback);
-    }
-    // Fetch data for the 'competitionEditionsData' table
-    else if (table.tableInfo.id === "competitionEditionsData") {
-      fetchCompetitionEditionsData(table, token, doneCallback);
+      fetchPhysicalData(table, parameters, doneCallback);
+    } else if (table.tableInfo.id === "competitionEditionsData") {
+      fetchCompetitionEditionsData(table, doneCallback);
     }
   };
 
   // Function to fetch physical data from the API
-  function fetchPhysicalData(table, parameterValues, token, doneCallback) {
+  function fetchPhysicalData(table, parameters, doneCallback) {
+    // Construct API URL based on parameters
+    var apiUrl =
+      "https://skillcorner.com/api/physical/?data_version=3&physical_check_passed=true";
+
     // Build query string from parameters
     var queryString = "";
-    if (parameterValues.season)
-      queryString += "&season=" + parameterValues.season;
-    if (parameterValues.competition)
-      queryString += "&competition=" + parameterValues.competition;
-    if (parameterValues.match) queryString += "&match=" + parameterValues.match;
-    if (parameterValues.team) queryString += "&team=" + parameterValues.team;
-    if (parameterValues.competition_edition)
-      queryString +=
-        "&competition_edition=" + parameterValues.competition_edition;
+    if (parameters.season) queryString += "&season=" + parameters.season;
+    if (parameters.competition)
+      queryString += "&competition=" + parameters.competition;
+    if (parameters.match) queryString += "&match=" + parameters.match;
+    if (parameters.team) queryString += "&team=" + parameters.team;
+    if (parameters.competition_edition)
+      queryString += "&competition_edition=" + parameters.competition_edition;
 
-    // Construct the API URL without the token appended
-    var apiUrl =
-      "https://skillcorner.com/api/physical/?data_version=3&physical_check_passed=true" +
-      queryString +
-      "&group_by=player,match&average_per=match";
+    // Append query string to API URL
+    apiUrl += queryString;
 
-    console.log("Physical Data API URL:", apiUrl);
-
-    // Recursive function to fetch paginated data from the API
-    function fetchData(url, pageCount) {
-      $.ajax({
-        url: url, // The URL to request data from
-        type: "GET", // HTTP method to use
-        dataType: "json", // The type of data expected back from the server
-        beforeSend: function (xhr) {
-          // Setting Basic Auth headers
-          xhr.setRequestHeader(
-            "Authorization",
-            "Basic " + btoa(tableau.username + ":" + tableau.password)
-          );
-        },
-        success: function (data) {
-          // Function to run if the request succeeds
-          var tableData = [];
-          console.log(
-            `Data received for page ${pageCount}:`,
-            data.results.length
-          );
-
-          // Process each record in the data
-          data.results.forEach(function (record) {
-            // Create a structured data object for each record
-            tableData.push({
-              player_name: record.player_name,
-              player_short_name: record.player_short_name,
-              player_id: record.player_id,
-              player_birthdate: record.player_birthdate,
-              team_name: record.team_name,
-              team_id: record.team_id,
-              match_name: record.match_name,
-              match_id: record.match_id,
-              match_date: record.match_date,
-              competition_name: record.competition_name,
-              competition_id: record.competition_id,
-              season_name: record.season_name,
-              season_id: record.season_id,
-              competition_edition_id: record.competition_edition_id,
-              position: record.position,
-              position_group: record.position_group,
-              minutes_full_all: record.minutes_full_all,
-              physical_check_passed: record.physical_check_passed,
-              total_distance_full_all: record.total_distance_full_all,
-              total_metersperminute_full_all:
-                record.total_metersperminute_full_all,
-              running_distance_full_all: record.running_distance_full_all,
-              hsr_distance_full_all: record.hsr_distance_full_all,
-              hsr_count_full_all: record.hsr_count_full_all,
-              sprint_distance_full_all: record.sprint_distance_full_all,
-              sprint_count_full_all: record.sprint_count_full_all,
-              hi_distance_full_all: record.hi_distance_full_all,
-              hi_count_full_all: record.hi_count_full_all,
-              medaccel_count_full_all: record.medaccel_count_full_all,
-              highaccel_count_full_all: record.highaccel_count_full_all,
-              meddecel_count_full_all: record.meddecel_count_full_all,
-              highdecel_count_full_all: record.highdecel_count_full_all,
-              psv99: record.psv99,
-            });
-          });
-
-          // Append rows to the table
-          table.appendRows(tableData);
-
-          // If there is a next page, fetch it
-          if (data.next) {
-            console.log("Fetching next page:", data.next);
-            // Recursive call to fetch the next page of data
-            fetchData(data.next, pageCount + 1);
-          } else {
-            console.log("All pages fetched");
-            doneCallback();
-          }
-        },
-        error: function (xhr, textStatus, errorThrown) {
-          console.error(
-            `Error while fetching data on page ${pageCount}:`,
-            textStatus,
-            errorThrown
-          );
-          tableau.abortWithError(
-            "Failed to get physical data from SkillCorner API"
-          );
-        },
-      });
-    }
-
-    // Initial data fetch call
-    fetchData(apiUrl, 1);
-  }
-
-  // Function to fetch competition editions data from the API
-  function fetchCompetitionEditionsData(table, token, doneCallback) {
-    // Construct the API URL
-    var apiUrl = "https://skillcorner.com/api/competition_editions/?user=true";
-
+    // Fetch data from API
     $.ajax({
       url: apiUrl,
       type: "GET",
       dataType: "json",
       beforeSend: function (xhr) {
+        // Set basic authentication header
         xhr.setRequestHeader(
           "Authorization",
           "Basic " + btoa(tableau.username + ":" + tableau.password)
@@ -229,7 +127,76 @@
       },
       success: function (data) {
         var tableData = [];
-        console.log("Competition Editions Data received:", data.results.length);
+
+        // Process each record in the data
+        data.results.forEach(function (record) {
+          tableData.push({
+            player_name: record.player_name,
+            player_short_name: record.player_short_name,
+            player_id: record.player_id,
+            player_birthdate: record.player_birthdate,
+            team_name: record.team_name,
+            team_id: record.team_id,
+            match_name: record.match_name,
+            match_id: record.match_id,
+            match_date: record.match_date,
+            competition_name: record.competition_name,
+            competition_id: record.competition_id,
+            season_name: record.season_name,
+            season_id: record.season_id,
+            competition_edition_id: record.competition_edition_id,
+            position: record.position,
+            position_group: record.position_group,
+            minutes_full_all: record.minutes_full_all,
+            physical_check_passed: record.physical_check_passed,
+            total_distance_full_all: record.total_distance_full_all,
+            total_metersperminute_full_all:
+              record.total_metersperminute_full_all,
+            running_distance_full_all: record.running_distance_full_all,
+            hsr_distance_full_all: record.hsr_distance_full_all,
+            hsr_count_full_all: record.hsr_count_full_all,
+            sprint_distance_full_all: record.sprint_distance_full_all,
+            sprint_count_full_all: record.sprint_count_full_all,
+            hi_distance_full_all: record.hi_distance_full_all,
+            hi_count_full_all: record.hi_count_full_all,
+            medaccel_count_full_all: record.medaccel_count_full_all,
+            highaccel_count_full_all: record.highaccel_count_full_all,
+            meddecel_count_full_all: record.meddecel_count_full_all,
+            highdecel_count_full_all: record.highdecel_count_full_all,
+            psv99: record.psv99,
+          });
+        });
+
+        // Append data to Tableau
+        table.appendRows(tableData);
+        doneCallback();
+      },
+      error: function (xhr, textStatus, errorThrown) {
+        console.error("Error fetching physical data:", textStatus, errorThrown);
+        tableau.abortWithError(
+          "Error fetching physical data from SkillCorner API"
+        );
+      },
+    });
+  }
+
+  // Function to fetch competition editions data from the API
+  function fetchCompetitionEditionsData(table, doneCallback) {
+    var apiUrl = "https://skillcorner.com/api/competition_editions/?user=true";
+
+    $.ajax({
+      url: apiUrl,
+      type: "GET",
+      dataType: "json",
+      beforeSend: function (xhr) {
+        // Set basic authentication header
+        xhr.setRequestHeader(
+          "Authorization",
+          "Basic " + btoa(tableau.username + ":" + tableau.password)
+        );
+      },
+      success: function (data) {
+        var tableData = [];
 
         // Process each record in the data
         data.results.forEach(function (record) {
@@ -248,18 +215,18 @@
           });
         });
 
-        // Append rows to the table
+        // Append data to Tableau
         table.appendRows(tableData);
         doneCallback();
       },
       error: function (xhr, textStatus, errorThrown) {
         console.error(
-          "Error while fetching competition editions data:",
+          "Error fetching competition editions data:",
           textStatus,
           errorThrown
         );
         tableau.abortWithError(
-          "Failed to get competition editions data from SkillCorner API"
+          "Error fetching competition editions data from SkillCorner API"
         );
       },
     });
