@@ -84,9 +84,21 @@
 
   // Fetch data for the tables based on the schema
   myConnector.getData = function (table, doneCallback) {
+    // Parse connectionData and check for `parameters`
     var connectionData = JSON.parse(tableau.connectionData);
-    var parameters = connectionData.parameters;
+    var parameters = connectionData.parameters || {}; // Ensure parameters is at least an empty object
 
+    // Debugging logs
+    console.log("connectionData: ", connectionData);
+    console.log("parameters: ", parameters);
+
+    // Ensure parameters are defined
+    if (!parameters) {
+      tableau.abortWithError("Parameters are not defined.");
+      return;
+    }
+
+    // Determine the table and fetch data accordingly
     if (table.tableInfo.id === "physicalData") {
       fetchPhysicalData(table, parameters, doneCallback);
     } else if (table.tableInfo.id === "competitionEditionsData") {
@@ -96,22 +108,37 @@
 
   // Function to fetch physical data from the API
   function fetchPhysicalData(table, parameters, doneCallback) {
-    // Construct API URL based on parameters
     var apiUrl =
       "https://skillcorner.com/api/physical/?data_version=3&physical_check_passed=true";
 
-    // Build query string from parameters
-    var queryString = "";
-    if (parameters.season) queryString += "&season=" + parameters.season;
+    // Create an array to hold query parameters
+    var queryParams = [];
+
+    // Add parameters to the array only if they are defined
+    if (parameters.season)
+      queryParams.push("season=" + encodeURIComponent(parameters.season));
     if (parameters.competition)
-      queryString += "&competition=" + parameters.competition;
-    if (parameters.match) queryString += "&match=" + parameters.match;
-    if (parameters.team) queryString += "&team=" + parameters.team;
+      queryParams.push(
+        "competition=" + encodeURIComponent(parameters.competition)
+      );
+    if (parameters.match)
+      queryParams.push("match=" + encodeURIComponent(parameters.match));
+    if (parameters.team)
+      queryParams.push("team=" + encodeURIComponent(parameters.team));
     if (parameters.competition_edition)
-      queryString += "&competition_edition=" + parameters.competition_edition;
+      queryParams.push(
+        "competition_edition=" +
+          encodeURIComponent(parameters.competition_edition)
+      );
+
+    // Join the array into a query string
+    var queryString = queryParams.length ? "&" + queryParams.join("&") : "";
 
     // Append query string to API URL
     apiUrl += queryString;
+
+    // Debugging log
+    console.log("API URL: ", apiUrl);
 
     // Fetch data from API
     $.ajax({
