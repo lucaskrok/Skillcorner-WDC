@@ -2,95 +2,104 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Skillcorner API WDC</title>
-    <!-- Link to external CSS file for styling -->
+    <title>SkillCorner Web Data Connector</title>
     <link rel="stylesheet" href="style.css" />
-    <!-- Load jQuery library from a CDN -->
-    <script
-      src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"
-      type="text/javascript"
-    ></script>
-    <!-- Load Tableau Web Data Connector library from Tableau's CDN -->
-    <script
-      src="https://connectors.tableau.com/libs/tableauwdc-2.4.latest.js"
-      type="text/javascript"
-    ></script>
+    <!-- Include jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <!-- Include Tableau WDC library -->
+    <script src="https://connectors.tableau.com/libs/tableauwdc-2.4.0.min.js"></script>
   </head>
   <body>
-    <header>
-      <!-- Header section with the title of the page -->
-      <h1>Skillcorner Web Data Connector</h1>
-    </header>
-    <main>
-      <form id="dataForm">
-        <!-- Form group for match parameter input -->
-        <div class="form-group">
-          <label for="match-parameter">Match:</label>
-          <input
-            type="text"
-            id="match-parameter"
-            name="match"
-            placeholder="Enter match ID(s), separated by commas"
-          />
-        </div>
-        <!-- Form group for team parameter input -->
-        <div class="form-group">
-          <label for="team-parameter">Team:</label>
-          <input
-            type="text"
-            id="team-parameter"
-            name="team"
-            placeholder="Enter team ID(s), separated by commas"
-          />
-        </div>
-        <!-- Form group for competition edition parameter input -->
-        <div class="form-group">
-          <label for="competition_edition-parameter"
-            >Competition Edition:</label
-          >
-          <input
-            type="text"
-            id="competition_edition-parameter"
-            name="competition_edition"
-            placeholder="Enter Competition Edition ID, separated by commas"
-          />
-        </div>
-        <!-- Form group for season parameter input -->
-        <div class="form-group">
-          <label for="season-parameter">Season:</label>
-          <input
-            type="text"
-            id="season-parameter"
-            name="season"
-            placeholder="Enter season ID(s), separated by commas"
-          />
-        </div>
-        <!-- Form group for competition parameter input -->
-        <div class="form-group">
-          <label for="competition-parameter">Competition:</label>
-          <input
-            type="text"
-            id="competition-parameter"
-            name="competition"
-            placeholder="Enter competition ID(s), separated by commas"
-          />
-        </div>
-        <!-- Form group for token input -->
-        <div class="form-group">
-          <label for="token-input">API Token:</label>
-          <input
-            type="text"
-            id="token-input"
-            name="token"
-            placeholder="Enter API token"
-          />
-        </div>
-        <!-- Submit button to fetch data based on the input parameters -->
-        <button type="button" id="submitButton">Click here to get data!</button>
-      </form>
-    </main>
-    <!-- Link to the external JavaScript file containing the WDC logic -->
+    <!-- Authentication form -->
+    <div id="authForm">
+      <label for="username">Username:</label>
+      <input type="text" id="username" name="username" /><br /><br />
+      <label for="password">Password:</label>
+      <input type="password" id="password" name="password" /><br /><br />
+      <button type="button" id="loginButton">Login</button>
+    </div>
+
+    <!-- Form for user parameters -->
+    <form id="connectionForm" style="display: none">
+      <label for="season-parameter">Season:</label>
+      <input
+        type="text"
+        id="season-parameter"
+        name="season-parameter"
+      /><br /><br />
+      <label for="competition-parameter">Competition:</label>
+      <input
+        type="text"
+        id="competition-parameter"
+        name="competition-parameter"
+      /><br /><br />
+      <label for="match-parameter">Match:</label>
+      <input
+        type="text"
+        id="match-parameter"
+        name="match-parameter"
+      /><br /><br />
+      <label for="team-parameter">Team:</label>
+      <input
+        type="text"
+        id="team-parameter"
+        name="team-parameter"
+      /><br /><br />
+      <label for="competition_edition-parameter">Competition Edition:</label>
+      <input
+        type="text"
+        id="competition_edition-parameter"
+        name="competition_edition-parameter"
+      /><br /><br />
+      <button type="button" id="submitButton">Submit</button>
+    </form>
+
+    <!-- Script to handle interactions in HTML -->
+    <script>
+      $(document).ready(function () {
+        // Show authentication form by default
+        $("#authForm").show();
+        $("#connectionForm").hide();
+
+        // Handle login button click
+        $("#loginButton").click(function () {
+          var username = $("#username").val().trim();
+          var password = $("#password").val().trim();
+
+          if (username !== "" && password !== "") {
+            tableau.username = username;
+            tableau.password = password;
+
+            // Hide auth form and show connection form
+            $("#authForm").hide();
+            $("#connectionForm").show();
+          } else {
+            alert("Please enter username and password.");
+          }
+        });
+
+        // Handle submit button click
+        $("#submitButton").click(function () {
+          // Fetch data based on user inputs
+          var parameters = {
+            season: $("#season-parameter").val().trim(),
+            competition: $("#competition-parameter").val().trim(),
+            match: $("#match-parameter").val().trim(),
+            team: $("#team-parameter").val().trim(),
+            competition_edition: $("#competition_edition-parameter")
+              .val()
+              .trim(),
+          };
+
+          tableau.connectionData = JSON.stringify(parameters);
+
+          // Start Tableau WDC process
+          tableau.submit();
+        });
+      });
+    </script>
+
+    <!-- Include your JavaScript file -->
     <script src="./Iteration2.js"></script>
   </body>
 </html>
