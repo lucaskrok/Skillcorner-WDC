@@ -1,12 +1,6 @@
 (function () {
   var myConnector = tableau.makeConnector();
 
-  // Init function for the connector
-  myConnector.init = function (initCallback) {
-    tableau.authType = tableau.authTypeEnum.basic;
-    initCallback();
-  };
-
   // Define the schema for the data tables
   myConnector.getSchema = function (schemaCallback) {
     // Columns for the 'physicalData' table
