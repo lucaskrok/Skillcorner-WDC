@@ -1,18 +1,15 @@
 (function () {
-  // Create a new Web Data Connector (WDC) object
   var myConnector = tableau.makeConnector();
 
-  // Initialize function to set auth type and initialize the connector
+  // Init function for the connector
   myConnector.init = function (initCallback) {
-    tableau.authType = tableau.authTypeEnum.basic; // Set auth type to basic
+    tableau.authType = tableau.authTypeEnum.custom;
 
+    // Handle different phases
     if (tableau.phase === tableau.phaseEnum.authPhase) {
-      // If we are in the auth phase, only show the UI needed for auth
-      $("#connectionForm").hide();
+      $("#connectionForm").hide(); // Hide form during auth phase
     } else if (tableau.phase === tableau.phaseEnum.gatherDataPhase) {
-      // Check if the credentials are still valid
-      var isValidCredentials = tableau.username && tableau.password;
-      if (!isValidCredentials) {
+      if (!tableau.username || !tableau.password) {
         tableau.abortForAuth();
         return;
       }
