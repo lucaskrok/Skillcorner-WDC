@@ -1,6 +1,12 @@
 (function () {
   var myConnector = tableau.makeConnector();
 
+  // Init function for the connector
+  myConnector.init = function (initCallback) {
+    tableau.authType = tableau.authTypeEnum.basic;
+    initCallback();
+  };
+
   // Define the schema for the data tables
   myConnector.getSchema = function (schemaCallback) {
     // Columns for the 'physicalData' table
@@ -78,13 +84,22 @@
   // Fetch data for the tables based on the schema
   myConnector.getData = function (table, doneCallback) {
     var connectionData = JSON.parse(tableau.connectionData);
-    var parameters = connectionData.parameters || {};
+    var parameters = connectionData.parameters || {}; // Ensure parameters is at least an empty object
 
     if (!parameters) {
       tableau.abortWithError("Parameters are not defined.");
       return;
     }
 
+    if (table.tableInfo.id === "physicalData") {
+      fetchPhysicalData(table, parameters, doneCallback);
+    } else if (table.tableInfo.id === "competitionEditionsData") {
+      fetchCompetitionEditionsData(table, doneCallback);
+    }
+  };
+
+  // Function to fetch physical data from the API
+  function fetchPhysicalData(table, parameters, doneCallback) {
     var apiUrl =
       "https://skillcorner.com/api/physical/?data_version=3&physical_check_passed=true";
     var queryParams = [];
@@ -167,7 +182,7 @@
         );
       },
     });
-  };
+  }
 
   // Function to fetch competition editions data from the API
   function fetchCompetitionEditionsData(table, doneCallback) {
@@ -219,6 +234,7 @@
   // Register the connector with Tableau
   tableau.registerConnector(myConnector);
 
+  // jQuery function to handle the submit button click event
   $(document).ready(function () {
     $("#submitButton").click(function () {
       var connectionData = {
@@ -235,5 +251,10 @@
       tableau.connectionName = "SkillCorner Data";
       tableau.submit();
     });
+  });
+
+  // Initiate the Tableau connector
+  $(document).ready(function () {
+    tableau.initCallback();
   });
 })();

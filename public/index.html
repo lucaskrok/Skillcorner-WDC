@@ -2,32 +2,85 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>SkillCorner WDC</title>
+    <title>SkillCorner Web Data Connector</title>
+    <link rel="stylesheet" href="style.css" />
+    <!-- Include jQuery library -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <!-- Include Tableau WDC library -->
     <script src="https://connectors.tableau.com/libs/tableauwdc-2.4.latest.js"></script>
-    <script src="test.js"></script>
   </head>
   <body>
-    <form id="connectionForm">
+    <!-- Authentication form -->
+    <div id="authForm">
+      <label for="username">Username:</label>
+      <input type="text" id="username" name="username" /><br /><br />
+      <label for="password">Password:</label>
+      <input type="password" id="password" name="password" /><br /><br />
+      <button type="button" id="loginButton">Login</button>
+    </div>
+
+    <!-- Form for user parameters -->
+    <form id="connectionForm" style="display: none">
       <label for="season-parameter">Season:</label>
-      <input type="text" id="season-parameter" name="season-parameter" /><br />
+      <input
+        type="text"
+        id="season-parameter"
+        name="season-parameter"
+      /><br /><br />
       <label for="competition-parameter">Competition:</label>
       <input
         type="text"
         id="competition-parameter"
         name="competition-parameter"
-      /><br />
+      /><br /><br />
       <label for="match-parameter">Match:</label>
-      <input type="text" id="match-parameter" name="match-parameter" /><br />
+      <input
+        type="text"
+        id="match-parameter"
+        name="match-parameter"
+      /><br /><br />
       <label for="team-parameter">Team:</label>
-      <input type="text" id="team-parameter" name="team-parameter" /><br />
+      <input
+        type="text"
+        id="team-parameter"
+        name="team-parameter"
+      /><br /><br />
       <label for="competition_edition-parameter">Competition Edition:</label>
       <input
         type="text"
         id="competition_edition-parameter"
         name="competition_edition-parameter"
-      /><br />
+      /><br /><br />
       <button type="button" id="submitButton">Submit</button>
     </form>
+
+    <!-- Script to handle interactions in HTML -->
+    <script>
+      $(document).ready(function () {
+        // Show authentication form by default
+        $("#authForm").show();
+        $("#connectionForm").hide();
+
+        // Handle login button click
+        $("#loginButton").click(function () {
+          var username = $("#username").val().trim();
+          var password = $("#password").val().trim();
+
+          if (username !== "" && password !== "") {
+            tableau.username = username;
+            tableau.password = password;
+
+            // Hide auth form and show connection form
+            $("#authForm").hide();
+            $("#connectionForm").show();
+          } else {
+            alert("Please enter username and password.");
+          }
+        });
+      });
+    </script>
+
+    <!-- Include your JavaScript file for the Tableau WDC -->
+    <script src="./test2.js"></script>
   </body>
 </html>

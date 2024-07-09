@@ -3,7 +3,7 @@
 
   // Init function for the connector
   myConnector.init = function (initCallback) {
-    tableau.authType = tableau.authTypeEnum.custom;
+    tableau.authType = tableau.authTypeEnum.basic;
 
     // Handle different phases
     if (tableau.phase === tableau.phaseEnum.authPhase) {
