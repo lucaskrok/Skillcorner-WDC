@@ -6,19 +6,23 @@
   myConnector.init = function (initCallback) {
     tableau.authType = tableau.authTypeEnum.basic; // Set auth type to basic
 
-    if (tableau.phase == tableau.phaseEnum.authPhase) {
-      // If in the authentication phase, prompt the user for credentials
-      tableau.username = $("#username").val().trim();
-      tableau.password = $("#password").val().trim();
-    } else if (tableau.phase == tableau.phaseEnum.gatherDataPhase) {
-      // If in the data gathering phase, validate that credentials are set
-      if (!tableau.username || !tableau.password) {
-        tableau.abortWithError("Credentials are missing.");
+    if (tableau.phase === tableau.phaseEnum.authPhase) {
+      // If we are in the auth phase, only show the UI needed for auth
+      $("#connectionForm").hide();
+    } else if (tableau.phase === tableau.phaseEnum.gatherDataPhase) {
+      // Check if the credentials are still valid
+      var isValidCredentials = tableau.username && tableau.password;
+      if (!isValidCredentials) {
+        tableau.abortForAuth();
         return;
       }
     }
 
     initCallback();
+
+    if (tableau.phase === tableau.phaseEnum.authPhase) {
+      tableau.submit();
+    }
   };
 
   // Define the schema for the data tables
@@ -97,21 +101,14 @@
 
   // Fetch data for the tables based on the schema
   myConnector.getData = function (table, doneCallback) {
-    // Parse connectionData and check for `parameters`
     var connectionData = JSON.parse(tableau.connectionData);
     var parameters = connectionData.parameters || {}; // Ensure parameters is at least an empty object
 
-    // Debugging logs
-    console.log("connectionData: ", connectionData);
-    console.log("parameters: ", parameters);
-
-    // Ensure parameters are defined
     if (!parameters) {
       tableau.abortWithError("Parameters are not defined.");
       return;
     }
 
-    // Determine the table and fetch data accordingly
     if (table.tableInfo.id === "physicalData") {
       fetchPhysicalData(table, parameters, doneCallback);
     } else if (table.tableInfo.id === "competitionEditionsData") {
@@ -123,11 +120,8 @@
   function fetchPhysicalData(table, parameters, doneCallback) {
     var apiUrl =
       "https://skillcorner.com/api/physical/?data_version=3&physical_check_passed=true";
-
-    // Create an array to hold query parameters
     var queryParams = [];
 
-    // Add parameters to the array only if they are defined
     if (parameters.season)
       queryParams.push("season=" + encodeURIComponent(parameters.season));
     if (parameters.competition)
@@ -144,22 +138,14 @@
           encodeURIComponent(parameters.competition_edition)
       );
 
-    // Join the array into a query string
     var queryString = queryParams.length ? "&" + queryParams.join("&") : "";
-
-    // Append query string to API URL
     apiUrl += queryString;
 
-    // Debugging log
-    console.log("API URL: ", apiUrl);
-
-    // Fetch data from API
     $.ajax({
       url: apiUrl,
       type: "GET",
       dataType: "json",
       beforeSend: function (xhr) {
-        // Set basic authentication header
         xhr.setRequestHeader(
           "Authorization",
           "Basic " + btoa(tableau.username + ":" + tableau.password)
@@ -167,8 +153,6 @@
       },
       success: function (data) {
         var tableData = [];
-
-        // Process each record in the data
         data.results.forEach(function (record) {
           tableData.push({
             player_name: record.player_name,
@@ -206,7 +190,6 @@
             psv99: record.psv99,
           });
         });
-        // Append data to Tableau
         table.appendRows(tableData);
         doneCallback();
       },
@@ -228,7 +211,6 @@
       type: "GET",
       dataType: "json",
       beforeSend: function (xhr) {
-        // Set basic authentication header
         xhr.setRequestHeader(
           "Authorization",
           "Basic " + btoa(tableau.username + ":" + tableau.password)
@@ -236,8 +218,6 @@
       },
       success: function (data) {
         var tableData = [];
-
-        // Process each record in the data
         data.results.forEach(function (record) {
           tableData.push({
             id: record.id,
@@ -253,8 +233,6 @@
             name: record.name,
           });
         });
-
-        // Append data to Tableau
         table.appendRows(tableData);
         doneCallback();
       },
@@ -277,8 +255,7 @@
   // jQuery function to handle the submit button click event
   $(document).ready(function () {
     $("#submitButton").click(function () {
-      // Set connection data and name, then submit
-      tableau.connectionData = JSON.stringify({
+      var connectionData = {
         parameters: {
           season: $("#season-parameter").val().trim(),
           competition: $("#competition-parameter").val().trim(),
@@ -286,14 +263,16 @@
           team: $("#team-parameter").val().trim(),
           competition_edition: $("#competition_edition-parameter").val().trim(),
         },
-      });
+      };
 
-      // Set credentials directly
-      tableau.username = $("#username").val().trim();
-      tableau.password = $("#password").val().trim();
-
+      tableau.connectionData = JSON.stringify(connectionData);
       tableau.connectionName = "SkillCorner Data";
       tableau.submit();
     });
+  });
+
+  // Initiate the Tableau connector
+  $(document).ready(function () {
+    tableau.initCallback();
   });
 })();

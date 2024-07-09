@@ -77,27 +77,6 @@
             alert("Please enter username and password.");
           }
         });
-
-        // Handle submit button click
-        $("#submitButton").click(function () {
-          // Create connection data object from user inputs
-          var connectionData = {
-            parameters: {
-              season: $("#season-parameter").val().trim(),
-              competition: $("#competition-parameter").val().trim(),
-              match: $("#match-parameter").val().trim(),
-              team: $("#team-parameter").val().trim(),
-              competition_edition: $("#competition_edition-parameter")
-                .val()
-                .trim(),
-            },
-          };
-
-          // Set connection data and name, then submit
-          tableau.connectionData = JSON.stringify(connectionData);
-          tableau.connectionName = "SkillCorner Data";
-          tableau.submit();
-        });
       });
     </script>
 
