@@ -2,6 +2,25 @@
   // Create a new Web Data Connector (WDC) object
   var myConnector = tableau.makeConnector();
 
+  // Initialize function to set auth type and initialize the connector
+  myConnector.init = function (initCallback) {
+    tableau.authType = tableau.authTypeEnum.basic; // Set auth type to basic
+
+    if (tableau.phase == tableau.phaseEnum.authPhase) {
+      // If in the authentication phase, prompt the user for credentials
+      tableau.username = $("#username").val().trim();
+      tableau.password = $("#password").val().trim();
+    } else if (tableau.phase == tableau.phaseEnum.gatherDataPhase) {
+      // If in the data gathering phase, validate that credentials are set
+      if (!tableau.username || !tableau.password) {
+        tableau.abortWithError("Credentials are missing.");
+        return;
+      }
+    }
+
+    initCallback();
+  };
+
   // Define the schema for the data tables
   myConnector.getSchema = function (schemaCallback) {
     // Columns for the 'physicalData' table
@@ -78,64 +97,89 @@
 
   // Fetch data for the tables based on the schema
   myConnector.getData = function (table, doneCallback) {
+    // Parse connectionData and check for `parameters`
     var connectionData = JSON.parse(tableau.connectionData);
-    var parameterValues = connectionData.parameters;
+    var parameters = connectionData.parameters || {}; // Ensure parameters is at least an empty object
 
-    // Fetch data based on the schema table
-    if (table.tableInfo.id === "physicalData") {
-      fetchPhysicalData(table, parameterValues);
-    } else if (table.tableInfo.id === "competitionEditionsData") {
-      fetchCompetitionEditionsData(table);
+    // Debugging logs
+    console.log("connectionData: ", connectionData);
+    console.log("parameters: ", parameters);
+
+    // Ensure parameters are defined
+    if (!parameters) {
+      tableau.abortWithError("Parameters are not defined.");
+      return;
     }
 
-    doneCallback();
+    // Determine the table and fetch data accordingly
+    if (table.tableInfo.id === "physicalData") {
+      fetchPhysicalData(table, parameters, doneCallback);
+    } else if (table.tableInfo.id === "competitionEditionsData") {
+      fetchCompetitionEditionsData(table, doneCallback);
+    }
   };
 
   // Function to fetch physical data from the API
-  function fetchPhysicalData(table, parameterValues) {
-    var username = tableau.username;
-    var password = tableau.password;
+  function fetchPhysicalData(table, parameters, doneCallback) {
     var apiUrl =
       "https://skillcorner.com/api/physical/?data_version=3&physical_check_passed=true";
 
-    // Build query string from parameters
-    var queryString = "";
-    if (parameterValues && parameterValues.season)
-      queryString += "&season=" + parameterValues.season;
-    if (parameterValues && parameterValues.competition)
-      queryString += "&competition=" + parameterValues.competition;
-    if (parameterValues && parameterValues.match)
-      queryString += "&match=" + parameterValues.match;
-    if (parameterValues && parameterValues.team)
-      queryString += "&team=" + parameterValues.team;
-    if (parameterValues && parameterValues.competition_edition)
-      queryString +=
-        "&competition_edition=" + parameterValues.competition_edition;
+    // Create an array to hold query parameters
+    var queryParams = [];
 
+    // Add parameters to the array only if they are defined
+    if (parameters.season)
+      queryParams.push("season=" + encodeURIComponent(parameters.season));
+    if (parameters.competition)
+      queryParams.push(
+        "competition=" + encodeURIComponent(parameters.competition)
+      );
+    if (parameters.match)
+      queryParams.push("match=" + encodeURIComponent(parameters.match));
+    if (parameters.team)
+      queryParams.push("team=" + encodeURIComponent(parameters.team));
+    if (parameters.competition_edition)
+      queryParams.push(
+        "competition_edition=" +
+          encodeURIComponent(parameters.competition_edition)
+      );
+
+    // Join the array into a query string
+    var queryString = queryParams.length ? "&" + queryParams.join("&") : "";
+
+    // Append query string to API URL
     apiUrl += queryString;
 
+    // Debugging log
+    console.log("API URL: ", apiUrl);
+
+    // Fetch data from API
     $.ajax({
       url: apiUrl,
       type: "GET",
       dataType: "json",
-      headers: {
-        Authorization: "Basic " + btoa(username + ":" + password),
+      beforeSend: function (xhr) {
+        // Set basic authentication header
+        xhr.setRequestHeader(
+          "Authorization",
+          "Basic " + btoa(tableau.username + ":" + tableau.password)
+        );
       },
       success: function (data) {
         var tableData = [];
 
-        // Process data and append rows to the table
+        // Process each record in the data
         data.results.forEach(function (record) {
           tableData.push({
             player_name: record.player_name,
             player_short_name: record.player_short_name,
             player_id: record.player_id,
-            player_birthdate: new Date(record.player_birthdate),
+            player_birthdate: record.player_birthdate,
             team_name: record.team_name,
             team_id: record.team_id,
             match_name: record.match_name,
             match_id: record.match_id,
-            match_date: new Date(record.match_date),
+            match_date: record.match_date,
             competition_name: record.competition_name,
             competition_id: record.competition_id,
             season_name: record.season_name,
@@ -162,94 +206,94 @@
             psv99: record.psv99,
           });
         });
-
+        // Append data to Tableau
         table.appendRows(tableData);
+        doneCallback();
       },
       error: function (xhr, textStatus, errorThrown) {
-        console.error("Error fetching physical data:", errorThrown);
+        console.error("Error fetching physical data:", textStatus, errorThrown);
         tableau.abortWithError(
-          "Failed to get physical data from SkillCorner API"
+          "Error fetching physical data from SkillCorner API"
         );
       },
     });
   }
 
   // Function to fetch competition editions data from the API
-  function fetchCompetitionEditionsData(table) {
-    var username = tableau.username;
-    var password = tableau.password;
+  function fetchCompetitionEditionsData(table, doneCallback) {
     var apiUrl = "https://skillcorner.com/api/competition_editions/?user=true";
 
     $.ajax({
       url: apiUrl,
       type: "GET",
       dataType: "json",
-      headers: {
-        Authorization: "Basic " + btoa(username + ":" + password),
+      beforeSend: function (xhr) {
+        // Set basic authentication header
+        xhr.setRequestHeader(
+          "Authorization",
+          "Basic " + btoa(tableau.username + ":" + tableau.password)
+        );
       },
       success: function (data) {
         var tableData = [];
 
-        // Process data and append rows to the table
+        // Process each record in the data
         data.results.forEach(function (record) {
           tableData.push({
             id: record.id,
-            competition_id: record.competition.id,
-            competition_area: record.competition.area,
-            competition_name: record.competition.name,
-            competition_gender: record.competition.gender,
-            competition_age_group: record.competition.age_group,
-            season_id: record.season.id,
-            season_start_year: record.season.start_year,
-            season_end_year: record.season.end_year,
-            season_name: record.season.name,
+            competition_id: record.competition_id,
+            competition_area: record.competition_area,
+            competition_name: record.competition_name,
+            competition_gender: record.competition_gender,
+            competition_age_group: record.competition_age_group,
+            season_id: record.season_id,
+            season_start_year: record.season_start_year,
+            season_end_year: record.season_end_year,
+            season_name: record.season_name,
             name: record.name,
           });
         });
 
+        // Append data to Tableau
         table.appendRows(tableData);
+        doneCallback();
       },
       error: function (xhr, textStatus, errorThrown) {
-        console.error("Error fetching competition editions data:", errorThrown);
+        console.error(
+          "Error fetching competition editions data:",
+          textStatus,
+          errorThrown
+        );
         tableau.abortWithError(
-          "Failed to get competition editions data from SkillCorner API"
+          "Error fetching competition editions data from SkillCorner API"
         );
       },
     });
   }
 
-  // Initialize the connector
-  myConnector.init = function (initCallback) {
-    tableau.authType = tableau.authTypeEnum.basic; // Set auth type to basic
-    initCallback();
-  };
-
-  // Register the connector
+  // Register the connector with Tableau
   tableau.registerConnector(myConnector);
 
-  // Function to gather user input from the form
+  // jQuery function to handle the submit button click event
   $(document).ready(function () {
     $("#submitButton").click(function () {
-      var username = $("#username").val().trim();
-      var password = $("#password").val().trim();
+      // Set connection data and name, then submit
+      tableau.connectionData = JSON.stringify({
+        parameters: {
+          season: $("#season-parameter").val().trim(),
+          competition: $("#competition-parameter").val().trim(),
+          match: $("#match-parameter").val().trim(),
+          team: $("#team-parameter").val().trim(),
+          competition_edition: $("#competition_edition-parameter").val().trim(),
+        },
+      });
 
-      if (username && password) {
-        tableau.username = username;
-        tableau.password = password;
-        tableau.connectionData = JSON.stringify({
-          parameters: {
-            season: $("#season").val().trim(),
-            competition: $("#competition").val().trim(),
-            match: $("#match").val().trim(),
-            team: $("#team").val().trim(),
-            competition_edition: $("#competition_edition").val().trim(),
-          },
-        });
-        tableau.connectionName = "SkillCorner Data"; // Connection name shown in Tableau
-        tableau.submit(); // Submit the connector to Tableau
-      } else {
-        alert("Please enter both username and password.");
-      }
+      // Set credentials directly
+      tableau.username = $("#username").val().trim();
+      tableau.password = $("#password").val().trim();
+
+      tableau.connectionName = "SkillCorner Data";
+      tableau.submit();
     });
   });
 })();
