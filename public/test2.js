@@ -3,14 +3,15 @@
 
   // Init function for the connector
   myConnector.init = function (initCallback) {
-    tableau.authType = tableau.authTypeEnum.basic;
+    tableau.authType = tableau.authTypeEnum.basic; // Set authType to basic
 
     // Handle different phases
     if (tableau.phase === tableau.phaseEnum.authPhase) {
       $("#connectionForm").hide(); // Hide form during auth phase
     } else if (tableau.phase === tableau.phaseEnum.gatherDataPhase) {
+      // During gatherDataPhase, ensure username and password are available
       if (!tableau.username || !tableau.password) {
-        tableau.abortForAuth();
+        tableau.abortForAuth(); // Abort if credentials are missing
         return;
       }
     }
@@ -18,7 +19,7 @@
     initCallback();
 
     if (tableau.phase === tableau.phaseEnum.authPhase) {
-      tableau.submit();
+      tableau.submit(); // Submit after authentication phase
     }
   };
 
