@@ -264,7 +264,7 @@
       };
 
       tableau.connectionData = JSON.stringify(connectionData);
-      tableau.connectionName = "SkillCorner Data";
+      tableau.connectionName = "SkillCorner WDC";
       tableau.submit();
     });
   });
