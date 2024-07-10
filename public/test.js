@@ -33,35 +33,55 @@
       { id: "player_birthdate", dataType: tableau.dataTypeEnum.date },
       { id: "team_name", dataType: tableau.dataTypeEnum.string },
       { id: "team_id", dataType: tableau.dataTypeEnum.int },
-      { id: "match_name", dataType: tableau.dataTypeEnum.string },
-      { id: "match_id", dataType: tableau.dataTypeEnum.int },
-      { id: "match_date", dataType: tableau.dataTypeEnum.date },
       { id: "competition_name", dataType: tableau.dataTypeEnum.string },
       { id: "competition_id", dataType: tableau.dataTypeEnum.int },
       { id: "season_name", dataType: tableau.dataTypeEnum.string },
       { id: "season_id", dataType: tableau.dataTypeEnum.int },
-      { id: "competition_edition_id", dataType: tableau.dataTypeEnum.int },
-      { id: "position", dataType: tableau.dataTypeEnum.string },
       { id: "position_group", dataType: tableau.dataTypeEnum.string },
       { id: "minutes_full_all", dataType: tableau.dataTypeEnum.float },
-      { id: "physical_check_passed", dataType: tableau.dataTypeEnum.bool },
-      { id: "total_distance_full_all", dataType: tableau.dataTypeEnum.float },
+      { id: "minutes_full_tip", dataType: tableau.dataTypeEnum.float },
+      { id: "minutes_full_otip", dataType: tableau.dataTypeEnum.float },
+      { id: "count_match", dataType: tableau.dataTypeEnum.int },
+      { id: "count_match_failed", dataType: tableau.dataTypeEnum.int },
+      { id: "psv99", dataType: tableau.dataTypeEnum.float },
+      { id: "psv99_top5", dataType: tableau.dataTypeEnum.float },
       {
-        id: "total_metersperminute_full_all",
+        id: "total_distance_full_all_p90",
         dataType: tableau.dataTypeEnum.float,
       },
-      { id: "running_distance_full_all", dataType: tableau.dataTypeEnum.float },
-      { id: "hsr_distance_full_all", dataType: tableau.dataTypeEnum.float },
-      { id: "hsr_count_full_all", dataType: tableau.dataTypeEnum.int },
-      { id: "sprint_distance_full_all", dataType: tableau.dataTypeEnum.float },
-      { id: "sprint_count_full_all", dataType: tableau.dataTypeEnum.int },
-      { id: "hi_distance_full_all", dataType: tableau.dataTypeEnum.float },
-      { id: "hi_count_full_all", dataType: tableau.dataTypeEnum.int },
-      { id: "medaccel_count_full_all", dataType: tableau.dataTypeEnum.int },
-      { id: "highaccel_count_full_all", dataType: tableau.dataTypeEnum.int },
-      { id: "meddecel_count_full_all", dataType: tableau.dataTypeEnum.int },
-      { id: "highdecel_count_full_all", dataType: tableau.dataTypeEnum.int },
-      { id: "psv99", dataType: tableau.dataTypeEnum.float },
+      {
+        id: "total_metersperminute_full_all_p90",
+        dataType: tableau.dataTypeEnum.float,
+      },
+      {
+        id: "running_distance_full_all_p90",
+        dataType: tableau.dataTypeEnum.float,
+      },
+      { id: "hsr_distance_full_all_p90", dataType: tableau.dataTypeEnum.float },
+      { id: "hsr_count_full_all_p90", dataType: tableau.dataTypeEnum.float },
+      {
+        id: "sprint_distance_full_all_p90",
+        dataType: tableau.dataTypeEnum.float,
+      },
+      { id: "sprint_count_full_all_p90", dataType: tableau.dataTypeEnum.float },
+      { id: "hi_distance_full_all_p90", dataType: tableau.dataTypeEnum.float },
+      { id: "hi_count_full_all_p90", dataType: tableau.dataTypeEnum.float },
+      {
+        id: "medaccel_count_full_all_p90",
+        dataType: tableau.dataTypeEnum.float,
+      },
+      {
+        id: "highaccel_count_full_all_p90",
+        dataType: tableau.dataTypeEnum.float,
+      },
+      {
+        id: "meddecel_count_full_all_p90",
+        dataType: tableau.dataTypeEnum.float,
+      },
+      {
+        id: "highdecel_count_full_all_p90",
+        dataType: tableau.dataTypeEnum.float,
+      },
     ];
 
     // Schema definition for the 'physicalData' table
@@ -117,7 +137,7 @@
   // Function to fetch physical data from the API
   function fetchPhysicalData(table, parameters, doneCallback) {
     var apiUrl =
-      "https://skillcorner.com/api/physical/?data_version=3&physical_check_passed=true";
+      "https://skillcorner.com/api/physical/?data_version=3&playing_time__gte=60&count_match__gte=1&possession=all,tip,otip&physical_check_passed=true&group_by=player,team,position_group,season,competition&average_per=p90";
     var queryParams = [];
 
     if (parameters.season)
@@ -159,33 +179,32 @@
             player_birthdate: record.player_birthdate,
             team_name: record.team_name,
             team_id: record.team_id,
-            match_name: record.match_name,
-            match_id: record.match_id,
-            match_date: record.match_date,
             competition_name: record.competition_name,
             competition_id: record.competition_id,
             season_name: record.season_name,
             season_id: record.season_id,
-            competition_edition_id: record.competition_edition_id,
-            position: record.position,
             position_group: record.position_group,
             minutes_full_all: record.minutes_full_all,
-            physical_check_passed: record.physical_check_passed,
-            total_distance_full_all: record.total_distance_full_all,
-            total_metersperminute_full_all:
-              record.total_metersperminute_full_all,
-            running_distance_full_all: record.running_distance_full_all,
-            hsr_distance_full_all: record.hsr_distance_full_all,
-            hsr_count_full_all: record.hsr_count_full_all,
-            sprint_distance_full_all: record.sprint_distance_full_all,
-            sprint_count_full_all: record.sprint_count_full_all,
-            hi_distance_full_all: record.hi_distance_full_all,
-            hi_count_full_all: record.hi_count_full_all,
-            medaccel_count_full_all: record.medaccel_count_full_all,
-            highaccel_count_full_all: record.highaccel_count_full_all,
-            meddecel_count_full_all: record.meddecel_count_full_all,
-            highdecel_count_full_all: record.highdecel_count_full_all,
+            minutes_full_tip: record.minutes_full_tip,
+            minutes_full_otip: record.minutes_full_otip,
+            count_match: record.count_match,
+            count_match_failed: record.count_match_failed,
             psv99: record.psv99,
+            psv99_top5: record.psv99_top5,
+            total_distance_full_all_p90: record.total_distance_full_all_p90,
+            total_metersperminute_full_all_p90:
+              record.total_metersperminute_full_all_p90,
+            running_distance_full_all_p90: record.running_distance_full_all_p90,
+            hsr_distance_full_all_p90: record.hsr_distance_full_all_p90,
+            hsr_count_full_all_p90: record.hsr_count_full_all_p90,
+            sprint_distance_full_all_p90: record.sprint_distance_full_all_p90,
+            sprint_count_full_all_p90: record.sprint_count_full_all_p90,
+            hi_distance_full_all_p90: record.hi_distance_full_all_p90,
+            hi_count_full_all_p90: record.hi_count_full_all_p90,
+            medaccel_count_full_all_p90: record.medaccel_count_full_all_p90,
+            highaccel_count_full_all_p90: record.highaccel_count_full_all_p90,
+            meddecel_count_full_all_p90: record.meddecel_count_full_all_p90,
+            highdecel_count_full_all_p90: record.highdecel_count_full_all_p90,
           });
         });
         table.appendRows(tableData);
