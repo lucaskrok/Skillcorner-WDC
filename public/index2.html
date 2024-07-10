@@ -4,10 +4,11 @@
     <meta charset="UTF-8" />
     <title>SkillCorner Web Data Connector</title>
     <link rel="stylesheet" href="style.css" />
-    <!-- Include jQuery library -->
+    <!-- Link to your CSS file -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-    <!-- Include Tableau WDC library -->
+    <!-- jQuery library -->
     <script src="https://connectors.tableau.com/libs/tableauwdc-2.4.latest.js"></script>
+    <!-- Tableau WDC library -->
   </head>
   <body>
     <!-- Authentication form -->
@@ -77,10 +78,29 @@
             alert("Please enter username and password.");
           }
         });
+
+        // Handle submit button click
+        $("#submitButton").click(function () {
+          var connectionData = {
+            parameters: {
+              season: $("#season-parameter").val().trim(),
+              competition: $("#competition-parameter").val().trim(),
+              match: $("#match-parameter").val().trim(),
+              team: $("#team-parameter").val().trim(),
+              competition_edition: $("#competition_edition-parameter")
+                .val()
+                .trim(),
+            },
+          };
+
+          tableau.connectionData = JSON.stringify(connectionData);
+          tableau.connectionName = "SkillCorner WDC";
+          tableau.submit();
+        });
       });
     </script>
 
     <!-- Include your JavaScript file for the Tableau WDC -->
-    <script src="./test2.js"></script>
+    <script src="./test.js"></script>
   </body>
 </html>
