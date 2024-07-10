@@ -55,12 +55,19 @@
       <button type="button" id="submitButton">Submit</button>
     </form>
 
+    <!-- Results section for competition editions -->
+    <div id="results-section" style="display: none">
+      <h2>Competition Editions</h2>
+      <ul id="competition-editions-list"></ul>
+    </div>
+
     <!-- Script to handle interactions in HTML -->
     <script>
       $(document).ready(function () {
         // Show authentication form by default
         $("#authForm").show();
         $("#connectionForm").hide();
+        $("#results-section").hide();
 
         // Handle login button click
         $("#loginButton").click(function () {
@@ -71,9 +78,8 @@
             tableau.username = username;
             tableau.password = password;
 
-            // Hide auth form and show connection form
-            $("#authForm").hide();
-            $("#connectionForm").show();
+            // Call function to fetch competition editions
+            fetchCompetitionEditions(username, password);
           } else {
             alert("Please enter username and password.");
           }
@@ -97,6 +103,52 @@
           tableau.connectionName = "SkillCorner Data";
           tableau.submit();
         });
+
+        // Function to fetch competition editions
+        function fetchCompetitionEditions(username, password) {
+          $.ajax({
+            url: "https://skillcorner.com/api/competition_editions/?user=true",
+            type: "GET",
+            dataType: "json",
+            beforeSend: function (xhr) {
+              xhr.setRequestHeader(
+                "Authorization",
+                "Basic " + btoa(username + ":" + password)
+              );
+            },
+            success: function (data) {
+              $("#authForm").hide();
+              $("#results-section").show();
+
+              var list = $("#competition-editions-list");
+              list.empty();
+
+              data.results.forEach(function (edition) {
+                var competitionEditionName = edition.name;
+                var competitionEditionId = edition.id;
+                var competitionId = edition.competition.id;
+                var competitionName = edition.competition.name;
+
+                list.append(
+                  "<li>Competition Edition ID: " +
+                    competitionEditionId +
+                    " - " +
+                    competitionEditionName +
+                    " (Competition ID: " +
+                    competitionId +
+                    ", Competition Name: " +
+                    competitionName +
+                    ")</li>"
+                );
+              });
+
+              $("#connectionForm").show();
+            },
+            error: function (xhr, textStatus, errorThrown) {
+              console.error("Error fetching competition editions:", textStatus);
+            },
+          });
+        }
       });
     </script>
 
