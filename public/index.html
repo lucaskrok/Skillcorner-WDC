@@ -4,14 +4,10 @@
     <meta charset="UTF-8" />
     <title>SkillCorner Web Data Connector</title>
     <link rel="stylesheet" href="style.css" />
-    <!-- Link to your CSS file -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-    <!-- jQuery library -->
     <script src="https://connectors.tableau.com/libs/tableauwdc-2.4.latest.js"></script>
-    <!-- Tableau WDC library -->
   </head>
   <body>
-    <!-- Authentication form -->
     <div id="authForm">
       <label for="username">Username:</label>
       <input type="text" id="username" name="username" /><br /><br />
@@ -20,7 +16,6 @@
       <button type="button" id="loginButton">Login</button>
     </div>
 
-    <!-- Form for user parameters -->
     <form id="connectionForm" style="display: none">
       <label for="season-parameter">Season:</label>
       <input
@@ -55,24 +50,18 @@
       <button type="button" id="submitButton">Submit</button>
     </form>
 
-    <!-- Results section for displaying competition editions -->
     <div id="results-section" style="display: none">
       <h2>Avaliable Competition Editions</h2>
       <ul id="competition-editions-list"></ul>
     </div>
 
-    <!-- Include your JavaScript file for the Tableau WDC -->
     <script src="./test.js"></script>
-
-    <!-- Script to handle interactions in HTML -->
     <script>
       $(document).ready(function () {
-        // Show authentication form by default
         $("#authForm").show();
         $("#connectionForm").hide();
         $("#results-section").hide();
 
-        // Handle login button click
         $("#loginButton").click(function () {
           var username = $("#username").val().trim();
           var password = $("#password").val().trim();
@@ -81,15 +70,12 @@
             tableau.username = username;
             tableau.password = password;
 
-            // Hide auth form and show connection form
-            $("#authForm").hide();
-            $("#connectionForm").show();
+            fetchCompetitionEditions(username, password);
           } else {
             alert("Please enter username and password.");
           }
         });
 
-        // Handle submit button click
         $("#submitButton").click(function () {
           var connectionData = {
             parameters: {
@@ -107,37 +93,52 @@
           tableau.connectionName = "SkillCorner WDC";
           tableau.submit();
         });
-
-        // Function to fetch and display competition editions
-        function displayCompetitionEditions(data) {
-          $("#authForm").hide();
-          $("#results-section").show();
-
-          var list = $("#competition-editions-list");
-          list.empty();
-
-          data.results.forEach(function (edition) {
-            var competitionEditionName = edition.name;
-            var competitionEditionId = edition.id;
-            var competitionId = edition.competition.id;
-            var competitionName = edition.competition.name;
-
-            list.append(
-              "<li>Competition Edition ID: " +
-                competitionEditionId +
-                " - " +
-                competitionEditionName +
-                " (Competition ID: " +
-                competitionId +
-                ", Competition Name: " +
-                competitionName +
-                ")</li>"
-            );
-          });
-
-          $("#connectionForm").show();
-        }
       });
+
+      function fetchCompetitionEditions(username, password) {
+        $.ajax({
+          url: "https://skillcorner.com/api/competition_editions/?user=true",
+          type: "GET",
+          dataType: "json",
+          beforeSend: function (xhr) {
+            xhr.setRequestHeader(
+              "Authorization",
+              "Basic " + btoa(username + ":" + password)
+            );
+          },
+          success: function (data) {
+            $("#authForm").hide();
+            $("#results-section").show();
+
+            var list = $("#competition-editions-list");
+            list.empty();
+
+            data.results.forEach(function (edition) {
+              var competitionEditionName = edition.name;
+              var competitionEditionId = edition.id;
+              var competitionId = edition.competition.id;
+              var competitionName = edition.competition.name;
+
+              list.append(
+                "<li>Competition Edition ID: " +
+                  competitionEditionId +
+                  " - " +
+                  competitionEditionName +
+                  " (Competition ID: " +
+                  competitionId +
+                  ", Competition Name: " +
+                  competitionName +
+                  ")</li>"
+              );
+            });
+
+            $("#connectionForm").show();
+          },
+          error: function (xhr, textStatus, errorThrown) {
+            console.error("Error fetching competition editions:", textStatus);
+          },
+        });
+      }
     </script>
   </body>
 </html>
