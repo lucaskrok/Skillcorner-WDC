@@ -39,10 +39,27 @@
       { id: "season_id", dataType: tableau.dataTypeEnum.int },
       { id: "position_group", dataType: tableau.dataTypeEnum.string },
       { id: "minutes_full_all", dataType: tableau.dataTypeEnum.float },
+      { id: "minutes_full_bip", dataType: tableau.dataTypeEnum.float },
       { id: "minutes_full_tip", dataType: tableau.dataTypeEnum.float },
       { id: "minutes_full_otip", dataType: tableau.dataTypeEnum.float },
       { id: "count_match", dataType: tableau.dataTypeEnum.int },
       { id: "count_match_failed", dataType: tableau.dataTypeEnum.int },
+      { id: "total_distance_full_all", dataType: tableau.dataTypeEnum.float },
+      {
+        id: "total_metersperminute_full_all",
+        dataType: tableau.dataTypeEnum.float,
+      },
+      { id: "running_distance_full_all", dataType: tableau.dataTypeEnum.float },
+      { id: "hsr_distance_full_all", dataType: tableau.dataTypeEnum.float },
+      { id: "hsr_count_full_all", dataType: tableau.dataTypeEnum.float },
+      { id: "sprint_distance_full_all", dataType: tableau.dataTypeEnum.float },
+      { id: "sprint_count_full_all", dataType: tableau.dataTypeEnum.float },
+      { id: "hi_distance_full_all", dataType: tableau.dataTypeEnum.float },
+      { id: "hi_count_full_all", dataType: tableau.dataTypeEnum.float },
+      { id: "medaccel_count_full_all", dataType: tableau.dataTypeEnum.float },
+      { id: "highaccel_count_full_all", dataType: tableau.dataTypeEnum.float },
+      { id: "meddecel_count_full_all", dataType: tableau.dataTypeEnum.float },
+      { id: "highdecel_count_full_all", dataType: tableau.dataTypeEnum.float },
       { id: "psv99", dataType: tableau.dataTypeEnum.float },
       { id: "psv99_top5", dataType: tableau.dataTypeEnum.float },
       {
@@ -82,6 +99,87 @@
         id: "highdecel_count_full_all_p90",
         dataType: tableau.dataTypeEnum.float,
       },
+      {
+        id: "total_distance_full_bip_p60bip",
+        dataType: tableau.dataTypeEnum.float,
+      },
+      {
+        id: "total_metersperminute_full_bip_p60bip",
+        dataType: tableau.dataTypeEnum.float,
+      },
+      {
+        id: "running_distance_full_bip_p60bip",
+        dataType: tableau.dataTypeEnum.float,
+      },
+      {
+        id: "hsr_distance_full_bip_p60bip",
+        dataType: tableau.dataTypeEnum.float,
+      },
+      { id: "hsr_count_full_bip_p60bip", dataType: tableau.dataTypeEnum.float },
+      {
+        id: "sprint_distance_full_bip_p60bip",
+        dataType: tableau.dataTypeEnum.float,
+      },
+      {
+        id: "sprint_count_full_bip_p60bip",
+        dataType: tableau.dataTypeEnum.float,
+      },
+      {
+        id: "hi_distance_full_bip_p60bip",
+        dataType: tableau.dataTypeEnum.float,
+      },
+      { id: "hi_count_full_bip_p60bip", dataType: tableau.dataTypeEnum.float },
+      {
+        id: "medaccel_count_full_bip_p60bip",
+        dataType: tableau.dataTypeEnum.float,
+      },
+      {
+        id: "highaccel_count_full_bip_p60bip",
+        dataType: tableau.dataTypeEnum.float,
+      },
+      {
+        id: "meddecel_count_full_bip_p60bip",
+        dataType: tableau.dataTypeEnum.float,
+      },
+      {
+        id: "highdecel_count_full_bip_p60bip",
+        dataType: tableau.dataTypeEnum.float,
+      },
+      { id: "total_distance_full_tip", dataType: tableau.dataTypeEnum.float },
+      {
+        id: "total_metersperminute_full_tip",
+        dataType: tableau.dataTypeEnum.float,
+      },
+      { id: "running_distance_full_tip", dataType: tableau.dataTypeEnum.float },
+      { id: "hsr_distance_full_tip", dataType: tableau.dataTypeEnum.float },
+      { id: "hsr_count_full_tip", dataType: tableau.dataTypeEnum.float },
+      { id: "sprint_distance_full_tip", dataType: tableau.dataTypeEnum.float },
+      { id: "sprint_count_full_tip", dataType: tableau.dataTypeEnum.float },
+      { id: "hi_distance_full_tip", dataType: tableau.dataTypeEnum.float },
+      { id: "hi_count_full_tip", dataType: tableau.dataTypeEnum.float },
+      { id: "medaccel_count_full_tip", dataType: tableau.dataTypeEnum.float },
+      { id: "highaccel_count_full_tip", dataType: tableau.dataTypeEnum.float },
+      { id: "meddecel_count_full_tip", dataType: tableau.dataTypeEnum.float },
+      { id: "highdecel_count_full_tip", dataType: tableau.dataTypeEnum.float },
+      { id: "total_distance_full_otip", dataType: tableau.dataTypeEnum.float },
+      {
+        id: "total_metersperminute_full_otip",
+        dataType: tableau.dataTypeEnum.float,
+      },
+      {
+        id: "running_distance_full_otip",
+        dataType: tableau.dataTypeEnum.float,
+      },
+      { id: "hsr_distance_full_otip", dataType: tableau.dataTypeEnum.float },
+      { id: "hsr_count_full_otip", dataType: tableau.dataTypeEnum.float },
+      { id: "sprint_distance_full_otip", dataType: tableau.dataTypeEnum.float },
+      { id: "sprint_count_full_otip", dataType: tableau.dataTypeEnum.float },
+      { id: "hi_distance_full_otip", dataType: tableau.dataTypeEnum.float },
+      { id: "hi_count_full_otip", dataType: tableau.dataTypeEnum.float },
+      { id: "medaccel_count_full_otip", dataType: tableau.dataTypeEnum.float },
+      { id: "highaccel_count_full_otip", dataType: tableau.dataTypeEnum.float },
+      { id: "meddecel_count_full_otip", dataType: tableau.dataTypeEnum.float },
+      { id: "highdecel_count_full_otip", dataType: tableau.dataTypeEnum.float },
     ];
 
     // Schema definition for the 'physicalData' table
@@ -137,7 +235,7 @@
   // Function to fetch physical data from the API
   function fetchPhysicalData(table, parameters, doneCallback) {
     var apiUrl =
-      "https://skillcorner.com/api/physical/?data_version=3&playing_time__gte=60&count_match__gte=1&possession=all,tip,otip&physical_check_passed=true&group_by=player,team,position_group,season,competition&average_per=p90";
+      "https://skillcorner.com/api/physical/?data_version=3&count_match__gte=1&possession=all,tip,otip&physical_check_passed=true&group_by=player,team,position_group,season,competition&average_per=p90,match,p60bip";
     var queryParams = [];
 
     if (parameters.season)
@@ -155,6 +253,10 @@
         "competition_edition=" +
           encodeURIComponent(parameters.competition_edition)
       );
+
+    // Add the playing_time__gte parameter with a default value of 60
+    var playingTime = parameters.playing_time ? parameters.playing_time : 60;
+    queryParams.push("playing_time__gte=" + encodeURIComponent(playingTime));
 
     var queryString = queryParams.length ? "&" + queryParams.join("&") : "";
     apiUrl += queryString;

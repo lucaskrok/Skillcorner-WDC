@@ -4,14 +4,10 @@
     <meta charset="UTF-8" />
     <title>SkillCorner Web Data Connector</title>
     <link rel="stylesheet" href="style.css" />
-    <!-- Link to your CSS file -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-    <!-- jQuery library -->
     <script src="https://connectors.tableau.com/libs/tableauwdc-2.4.latest.js"></script>
-    <!-- Tableau WDC library -->
   </head>
   <body>
-    <!-- Authentication form -->
     <div id="authForm">
       <label for="username">Username:</label>
       <input type="text" id="username" name="username" /><br /><br />
@@ -20,7 +16,6 @@
       <button type="button" id="loginButton">Login</button>
     </div>
 
-    <!-- Form for user parameters -->
     <form id="connectionForm" style="display: none">
       <label for="season-parameter">Season:</label>
       <input
@@ -52,24 +47,30 @@
         id="competition_edition-parameter"
         name="competition_edition-parameter"
       /><br /><br />
+      <label for="playing-time-parameter"
+        >Playing Time Greater Than or Equal To (If left blank then 60
+        mins):</label
+      >
+      <input
+        type="text"
+        id="playing-time-parameter"
+        name="playing-time-parameter"
+        placeholder="Enter playing time"
+      /><br /><br />
       <button type="button" id="submitButton">Submit</button>
     </form>
 
-    <!-- Results section for competition editions -->
     <div id="results-section" style="display: none">
       <h2>Competition Editions</h2>
       <ul id="competition-editions-list"></ul>
     </div>
 
-    <!-- Script to handle interactions in HTML -->
     <script>
       $(document).ready(function () {
-        // Show authentication form by default
         $("#authForm").show();
         $("#connectionForm").hide();
         $("#results-section").hide();
 
-        // Handle login button click
         $("#loginButton").click(function () {
           var username = $("#username").val().trim();
           var password = $("#password").val().trim();
@@ -78,14 +79,12 @@
             tableau.username = username;
             tableau.password = password;
 
-            // Call function to fetch competition editions
             fetchCompetitionEditions(username, password);
           } else {
             alert("Please enter username and password.");
           }
         });
 
-        // Handle submit button click
         $("#submitButton").click(function () {
           var connectionData = {
             parameters: {
@@ -96,6 +95,7 @@
               competition_edition: $("#competition_edition-parameter")
                 .val()
                 .trim(),
+              playing_time: $("#playing-time-parameter").val().trim() || 60,
             },
           };
 
@@ -104,7 +104,6 @@
           tableau.submit();
         });
 
-        // Function to fetch competition editions
         function fetchCompetitionEditions(username, password) {
           $.ajax({
             url: "https://skillcorner.com/api/competition_editions/?user=true",
@@ -152,7 +151,6 @@
       });
     </script>
 
-    <!-- Include your JavaScript file for the Tableau WDC -->
     <script src="./test.js"></script>
   </body>
 </html>
