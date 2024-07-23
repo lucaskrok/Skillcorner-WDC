@@ -1,291 +1,397 @@
 (function () {
   var myConnector = tableau.makeConnector();
 
+  // Init function for the connector
+  myConnector.init = function (initCallback) {
+    tableau.authType = tableau.authTypeEnum.basic; // Set authType to basic
+
+    // Handle different phases
+    if (tableau.phase === tableau.phaseEnum.authPhase) {
+      $("#connectionForm").hide(); // Hide form during auth phase
+    } else if (tableau.phase === tableau.phaseEnum.gatherDataPhase) {
+      // During gatherDataPhase, ensure username and password are available
+      if (!tableau.username || !tableau.password) {
+        tableau.abortForAuth(); // Abort if credentials are missing
+        return;
+      }
+    }
+
+    initCallback();
+
+    if (tableau.phase === tableau.phaseEnum.authPhase) {
+      tableau.submit(); // Submit after authentication phase
+    }
+  };
+
+  // Define the schema for the data tables
   myConnector.getSchema = function (schemaCallback) {
-    // Define columns for physical data table
+    // Columns for the 'physicalData' table
     var physicalDataCols = [
+      { id: "player_name", dataType: tableau.dataTypeEnum.string },
+      { id: "player_short_name", dataType: tableau.dataTypeEnum.string },
+      { id: "player_id", dataType: tableau.dataTypeEnum.int },
+      { id: "player_birthdate", dataType: tableau.dataTypeEnum.date },
+      { id: "team_name", dataType: tableau.dataTypeEnum.string },
+      { id: "team_id", dataType: tableau.dataTypeEnum.int },
+      { id: "competition_name", dataType: tableau.dataTypeEnum.string },
+      { id: "competition_id", dataType: tableau.dataTypeEnum.int },
+      { id: "season_name", dataType: tableau.dataTypeEnum.string },
+      { id: "season_id", dataType: tableau.dataTypeEnum.int },
+      { id: "position_group", dataType: tableau.dataTypeEnum.string },
+      { id: "minutes_full_all", dataType: tableau.dataTypeEnum.float },
+      { id: "minutes_full_bip", dataType: tableau.dataTypeEnum.float },
+      { id: "minutes_full_tip", dataType: tableau.dataTypeEnum.float },
+      { id: "minutes_full_otip", dataType: tableau.dataTypeEnum.float },
+      { id: "count_match", dataType: tableau.dataTypeEnum.int },
+      { id: "count_match_failed", dataType: tableau.dataTypeEnum.int },
+      { id: "total_distance_full_all", dataType: tableau.dataTypeEnum.float },
       {
-        id: "match_id",
-        alias: "Match ID",
-        dataType: tableau.dataTypeEnum.int,
+        id: "total_metersperminute_full_all",
+        dataType: tableau.dataTypeEnum.float,
+      },
+      { id: "running_distance_full_all", dataType: tableau.dataTypeEnum.float },
+      { id: "hsr_distance_full_all", dataType: tableau.dataTypeEnum.float },
+      { id: "hsr_count_full_all", dataType: tableau.dataTypeEnum.float },
+      { id: "sprint_distance_full_all", dataType: tableau.dataTypeEnum.float },
+      { id: "sprint_count_full_all", dataType: tableau.dataTypeEnum.float },
+      { id: "hi_distance_full_all", dataType: tableau.dataTypeEnum.float },
+      { id: "hi_count_full_all", dataType: tableau.dataTypeEnum.float },
+      { id: "medaccel_count_full_all", dataType: tableau.dataTypeEnum.float },
+      { id: "highaccel_count_full_all", dataType: tableau.dataTypeEnum.float },
+      { id: "meddecel_count_full_all", dataType: tableau.dataTypeEnum.float },
+      { id: "highdecel_count_full_all", dataType: tableau.dataTypeEnum.float },
+      { id: "psv99", dataType: tableau.dataTypeEnum.float },
+      { id: "psv99_top5", dataType: tableau.dataTypeEnum.float },
+      {
+        id: "total_distance_full_all_p90",
+        dataType: tableau.dataTypeEnum.float,
       },
       {
-        id: "player_id",
-        alias: "Player ID",
-        dataType: tableau.dataTypeEnum.int,
+        id: "total_metersperminute_full_all_p90",
+        dataType: tableau.dataTypeEnum.float,
       },
       {
-        id: "team_id",
-        alias: "Team ID",
-        dataType: tableau.dataTypeEnum.int,
+        id: "running_distance_full_all_p90",
+        dataType: tableau.dataTypeEnum.float,
+      },
+      { id: "hsr_distance_full_all_p90", dataType: tableau.dataTypeEnum.float },
+      { id: "hsr_count_full_all_p90", dataType: tableau.dataTypeEnum.float },
+      {
+        id: "sprint_distance_full_all_p90",
+        dataType: tableau.dataTypeEnum.float,
+      },
+      { id: "sprint_count_full_all_p90", dataType: tableau.dataTypeEnum.float },
+      { id: "hi_distance_full_all_p90", dataType: tableau.dataTypeEnum.float },
+      { id: "hi_count_full_all_p90", dataType: tableau.dataTypeEnum.float },
+      {
+        id: "medaccel_count_full_all_p90",
+        dataType: tableau.dataTypeEnum.float,
       },
       {
-        id: "position",
-        alias: "Position",
-        dataType: tableau.dataTypeEnum.string,
+        id: "highaccel_count_full_all_p90",
+        dataType: tableau.dataTypeEnum.float,
       },
       {
-        id: "group",
-        alias: "Group",
-        dataType: tableau.dataTypeEnum.string,
+        id: "meddecel_count_full_all_p90",
+        dataType: tableau.dataTypeEnum.float,
       },
       {
-        id: "competition_id",
-        alias: "Competition ID",
-        dataType: tableau.dataTypeEnum.int,
+        id: "highdecel_count_full_all_p90",
+        dataType: tableau.dataTypeEnum.float,
       },
       {
-        id: "competition_edition_id",
-        alias: "Competition Edition ID",
-        dataType: tableau.dataTypeEnum.int,
+        id: "total_distance_full_bip_p60bip",
+        dataType: tableau.dataTypeEnum.float,
       },
       {
-        id: "season_id",
-        alias: "Season ID",
-        dataType: tableau.dataTypeEnum.int,
+        id: "total_metersperminute_full_bip_p60bip",
+        dataType: tableau.dataTypeEnum.float,
       },
       {
-        id: "quality_check",
-        alias: "Quality Check",
-        dataType: tableau.dataTypeEnum.bool,
+        id: "running_distance_full_bip_p60bip",
+        dataType: tableau.dataTypeEnum.float,
       },
       {
-        id: "distance_1",
-        alias: "Distance 1",
-        dataType: tableau.dataTypeEnum.int,
+        id: "hsr_distance_full_bip_p60bip",
+        dataType: tableau.dataTypeEnum.float,
       },
-      // Define other columns for physical data table
+      { id: "hsr_count_full_bip_p60bip", dataType: tableau.dataTypeEnum.float },
+      {
+        id: "sprint_distance_full_bip_p60bip",
+        dataType: tableau.dataTypeEnum.float,
+      },
+      {
+        id: "sprint_count_full_bip_p60bip",
+        dataType: tableau.dataTypeEnum.float,
+      },
+      {
+        id: "hi_distance_full_bip_p60bip",
+        dataType: tableau.dataTypeEnum.float,
+      },
+      { id: "hi_count_full_bip_p60bip", dataType: tableau.dataTypeEnum.float },
+      {
+        id: "medaccel_count_full_bip_p60bip",
+        dataType: tableau.dataTypeEnum.float,
+      },
+      {
+        id: "highaccel_count_full_bip_p60bip",
+        dataType: tableau.dataTypeEnum.float,
+      },
+      {
+        id: "meddecel_count_full_bip_p60bip",
+        dataType: tableau.dataTypeEnum.float,
+      },
+      {
+        id: "highdecel_count_full_bip_p60bip",
+        dataType: tableau.dataTypeEnum.float,
+      },
+      { id: "total_distance_full_tip", dataType: tableau.dataTypeEnum.float },
+      {
+        id: "total_metersperminute_full_tip",
+        dataType: tableau.dataTypeEnum.float,
+      },
+      { id: "running_distance_full_tip", dataType: tableau.dataTypeEnum.float },
+      { id: "hsr_distance_full_tip", dataType: tableau.dataTypeEnum.float },
+      { id: "hsr_count_full_tip", dataType: tableau.dataTypeEnum.float },
+      { id: "sprint_distance_full_tip", dataType: tableau.dataTypeEnum.float },
+      { id: "sprint_count_full_tip", dataType: tableau.dataTypeEnum.float },
+      { id: "hi_distance_full_tip", dataType: tableau.dataTypeEnum.float },
+      { id: "hi_count_full_tip", dataType: tableau.dataTypeEnum.float },
+      { id: "medaccel_count_full_tip", dataType: tableau.dataTypeEnum.float },
+      { id: "highaccel_count_full_tip", dataType: tableau.dataTypeEnum.float },
+      { id: "meddecel_count_full_tip", dataType: tableau.dataTypeEnum.float },
+      { id: "highdecel_count_full_tip", dataType: tableau.dataTypeEnum.float },
+      { id: "total_distance_full_otip", dataType: tableau.dataTypeEnum.float },
+      {
+        id: "total_metersperminute_full_otip",
+        dataType: tableau.dataTypeEnum.float,
+      },
+      {
+        id: "running_distance_full_otip",
+        dataType: tableau.dataTypeEnum.float,
+      },
+      { id: "hsr_distance_full_otip", dataType: tableau.dataTypeEnum.float },
+      { id: "hsr_count_full_otip", dataType: tableau.dataTypeEnum.float },
+      { id: "sprint_distance_full_otip", dataType: tableau.dataTypeEnum.float },
+      { id: "sprint_count_full_otip", dataType: tableau.dataTypeEnum.float },
+      { id: "hi_distance_full_otip", dataType: tableau.dataTypeEnum.float },
+      { id: "hi_count_full_otip", dataType: tableau.dataTypeEnum.float },
+      { id: "medaccel_count_full_otip", dataType: tableau.dataTypeEnum.float },
+      { id: "highaccel_count_full_otip", dataType: tableau.dataTypeEnum.float },
+      { id: "meddecel_count_full_otip", dataType: tableau.dataTypeEnum.float },
+      { id: "highdecel_count_full_otip", dataType: tableau.dataTypeEnum.float },
     ];
 
+    // Schema definition for the 'physicalData' table
     var physicalDataTableSchema = {
       id: "physicalData",
       alias: "Physical Data",
       columns: physicalDataCols,
     };
 
-    // Define columns for competition editions data table
+    // Columns for the 'competitionEditionsData' table
     var competitionEditionsCols = [
-      {
-        id: "id",
-        alias: "ID",
-        dataType: tableau.dataTypeEnum.int,
-      },
-      {
-        id: "competition_id",
-        alias: "Competition ID",
-        dataType: tableau.dataTypeEnum.int,
-      },
-      {
-        id: "competition_area",
-        alias: "Competition Area",
-        dataType: tableau.dataTypeEnum.string,
-      },
-      {
-        id: "competition_name",
-        alias: "Competition Name",
-        dataType: tableau.dataTypeEnum.string,
-      },
-      {
-        id: "competition_gender",
-        alias: "Competition Gender",
-        dataType: tableau.dataTypeEnum.string,
-      },
-      {
-        id: "competition_age_group",
-        alias: "Competition Age Group",
-        dataType: tableau.dataTypeEnum.string,
-      },
-      {
-        id: "season_id",
-        alias: "Season ID",
-        dataType: tableau.dataTypeEnum.int,
-      },
-      {
-        id: "season_start_year",
-        alias: "Season Start Year",
-        dataType: tableau.dataTypeEnum.int,
-      },
-      {
-        id: "season_end_year",
-        alias: "Season End Year",
-        dataType: tableau.dataTypeEnum.int,
-      },
-      {
-        id: "season_name",
-        alias: "Season Name",
-        dataType: tableau.dataTypeEnum.string,
-      },
-      {
-        id: "name",
-        alias: "Name",
-        dataType: tableau.dataTypeEnum.string,
-      },
-      // Add other columns for competition editions data table
+      { id: "id", dataType: tableau.dataTypeEnum.int },
+      { id: "competition_id", dataType: tableau.dataTypeEnum.int },
+      { id: "competition_area", dataType: tableau.dataTypeEnum.string },
+      { id: "competition_name", dataType: tableau.dataTypeEnum.string },
+      { id: "competition_gender", dataType: tableau.dataTypeEnum.string },
+      { id: "competition_age_group", dataType: tableau.dataTypeEnum.string },
+      { id: "season_id", dataType: tableau.dataTypeEnum.int },
+      { id: "season_start_year", dataType: tableau.dataTypeEnum.int },
+      { id: "season_end_year", dataType: tableau.dataTypeEnum.int },
+      { id: "season_name", dataType: tableau.dataTypeEnum.string },
+      { id: "name", dataType: tableau.dataTypeEnum.string },
     ];
 
+    // Schema definition for the 'competitionEditionsData' table
     var competitionEditionsTableSchema = {
-      id: "competitionEditions",
+      id: "competitionEditionsData",
       alias: "Competition Editions Data",
       columns: competitionEditionsCols,
     };
 
+    // Provide the schema definitions to Tableau
     schemaCallback([physicalDataTableSchema, competitionEditionsTableSchema]);
   };
 
+  // Fetch data for the tables based on the schema
   myConnector.getData = function (table, doneCallback) {
-    // Get the parameter values and token from tableau.connectionData
     var connectionData = JSON.parse(tableau.connectionData);
-    var parameterValues = connectionData.parameters;
-    var token = connectionData.token;
+    var parameters = connectionData.parameters || {}; // Ensure parameters is at least an empty object
+
+    if (!parameters) {
+      tableau.abortWithError("Parameters are not defined.");
+      return;
+    }
 
     if (table.tableInfo.id === "physicalData") {
-      // Fetch physical data
-      fetchPhysicalData(table, parameterValues, token, doneCallback);
-    } else if (table.tableInfo.id === "competitionEditions") {
-      // Fetch competition editions data
-      fetchCompetitionEditionsData(table, token, doneCallback);
+      fetchPhysicalData(table, parameters, doneCallback);
+    } else if (table.tableInfo.id === "competitionEditionsData") {
+      fetchCompetitionEditionsData(table, doneCallback);
     }
   };
 
-  // Function to fetch physical data
-  function fetchPhysicalData(table, parameterValues, token, doneCallback) {
-    // Construct the query string for the API call
-    var queryString = "";
-
-    // Add non-empty fields to the query string
-    if (parameterValues.season)
-      queryString += "&season=" + parameterValues.season;
-    if (parameterValues.competition)
-      queryString += "&competition=" + parameterValues.competition;
-    if (parameterValues.match) queryString += "&match=" + parameterValues.match;
-    if (parameterValues.team) queryString += "&team=" + parameterValues.team;
-
-    // Construct the complete API URL for physical data
+  // Function to fetch physical data from the API
+  function fetchPhysicalData(table, parameters, doneCallback) {
     var apiUrl =
-      "https://skillcorner.com/api/physical/?" +
-      queryString.slice(1) + // Remove leading "&" if present
-      "&average=false&api_version=v2&token=" +
-      token;
+      "https://skillcorner.com/api/physical/?data_version=3&count_match__gte=1&possession=all,tip,otip&physical_check_passed=true&group_by=player,team,position_group,season,competition&average_per=p90,match,p60bip";
+    var queryParams = [];
 
-    console.log("Physical Data API URL:", apiUrl); // Log the API URL for debugging
+    if (parameters.season)
+      queryParams.push("season=" + encodeURIComponent(parameters.season));
+    if (parameters.competition)
+      queryParams.push(
+        "competition=" + encodeURIComponent(parameters.competition)
+      );
+    if (parameters.match)
+      queryParams.push("match=" + encodeURIComponent(parameters.match));
+    if (parameters.team)
+      queryParams.push("team=" + encodeURIComponent(parameters.team));
+    if (parameters.competition_edition)
+      queryParams.push(
+        "competition_edition=" +
+          encodeURIComponent(parameters.competition_edition)
+      );
+
+    // Add the playing_time__gte parameter with a default value of 60
+    var playingTime = parameters.playing_time ? parameters.playing_time : 60;
+    queryParams.push("playing_time__gte=" + encodeURIComponent(playingTime));
+
+    var queryString = queryParams.length ? "&" + queryParams.join("&") : "";
+    apiUrl += queryString;
 
     $.ajax({
       url: apiUrl,
       type: "GET",
       dataType: "json",
+      beforeSend: function (xhr) {
+        xhr.setRequestHeader(
+          "Authorization",
+          "Basic " + btoa(tableau.username + ":" + tableau.password)
+        );
+      },
       success: function (data) {
         var tableData = [];
-
-        data.forEach(function (record) {
-          // Map the response fields to the correct column names
+        data.results.forEach(function (record) {
           tableData.push({
-            match_id: record.match_id,
+            player_name: record.player_name,
+            player_short_name: record.player_short_name,
             player_id: record.player_id,
+            player_birthdate: record.player_birthdate,
+            team_name: record.team_name,
             team_id: record.team_id,
-            position: record.position,
-            group: record.group,
+            competition_name: record.competition_name,
             competition_id: record.competition_id,
-            competition_edition_id: record.competition_edition_id,
+            season_name: record.season_name,
             season_id: record.season_id,
-            quality_check: record.quality_check,
-            distance_1: record["Distance 1"],
-            // Map other fields similarly
+            position_group: record.position_group,
+            minutes_full_all: record.minutes_full_all,
+            minutes_full_tip: record.minutes_full_tip,
+            minutes_full_otip: record.minutes_full_otip,
+            count_match: record.count_match,
+            count_match_failed: record.count_match_failed,
+            psv99: record.psv99,
+            psv99_top5: record.psv99_top5,
+            total_distance_full_all_p90: record.total_distance_full_all_p90,
+            total_metersperminute_full_all_p90:
+              record.total_metersperminute_full_all_p90,
+            running_distance_full_all_p90: record.running_distance_full_all_p90,
+            hsr_distance_full_all_p90: record.hsr_distance_full_all_p90,
+            hsr_count_full_all_p90: record.hsr_count_full_all_p90,
+            sprint_distance_full_all_p90: record.sprint_distance_full_all_p90,
+            sprint_count_full_all_p90: record.sprint_count_full_all_p90,
+            hi_distance_full_all_p90: record.hi_distance_full_all_p90,
+            hi_count_full_all_p90: record.hi_count_full_all_p90,
+            medaccel_count_full_all_p90: record.medaccel_count_full_all_p90,
+            highaccel_count_full_all_p90: record.highaccel_count_full_all_p90,
+            meddecel_count_full_all_p90: record.meddecel_count_full_all_p90,
+            highdecel_count_full_all_p90: record.highdecel_count_full_all_p90,
           });
         });
+        table.appendRows(tableData);
+        doneCallback();
+      },
+      error: function (xhr, textStatus, errorThrown) {
+        console.error("Error fetching physical data:", textStatus, errorThrown);
+        tableau.abortWithError(
+          "Error fetching physical data from SkillCorner API"
+        );
+      },
+    });
+  }
 
+  // Function to fetch competition editions data from the API
+  function fetchCompetitionEditionsData(table, doneCallback) {
+    var apiUrl = "https://skillcorner.com/api/competition_editions/?user=true";
+
+    $.ajax({
+      url: apiUrl,
+      type: "GET",
+      dataType: "json",
+      beforeSend: function (xhr) {
+        xhr.setRequestHeader(
+          "Authorization",
+          "Basic " + btoa(tableau.username + ":" + tableau.password)
+        );
+      },
+      success: function (data) {
+        var tableData = [];
+        data.results.forEach(function (record) {
+          tableData.push({
+            id: record.id,
+            competition_id: record.competition_id,
+            competition_area: record.competition_area,
+            competition_name: record.competition_name,
+            competition_gender: record.competition_gender,
+            competition_age_group: record.competition_age_group,
+            season_id: record.season_id,
+            season_start_year: record.season_start_year,
+            season_end_year: record.season_end_year,
+            season_name: record.season_name,
+            name: record.name,
+          });
+        });
         table.appendRows(tableData);
         doneCallback();
       },
       error: function (xhr, textStatus, errorThrown) {
         console.error(
-          "Error while fetching physical data: " + textStatus,
+          "Error fetching competition editions data:",
+          textStatus,
           errorThrown
         );
         tableau.abortWithError(
-          "Failed to get physical data from SkillCorner API"
+          "Error fetching competition editions data from SkillCorner API"
         );
       },
     });
   }
 
-  // Function to fetch competition editions data
-  function fetchCompetitionEditionsData(table, token, doneCallback) {
-    // Construct the complete API URL for competition editions data
-    var competitionEditionsApiUrl =
-      "https://skillcorner.com/api/competition_editions/?user=true&token=" +
-      token;
-
-    console.log("Competition Editions API URL:", competitionEditionsApiUrl); // Log the API URL for debugging
-
-    $.ajax({
-      url: competitionEditionsApiUrl,
-      type: "GET",
-      dataType: "json",
-      success: function (competitionEditionsData) {
-        var competitionEditionsTableData = [];
-
-        competitionEditionsData.results.forEach(function (record) {
-          // Map the response fields to the correct column names
-          competitionEditionsTableData.push({
-            id: record.id,
-            competition_id: record.competition.id,
-            competition_area: record.competition.area,
-            competition_name: record.competition.name,
-            competition_gender: record.competition.gender,
-            competition_age_group: record.competition.age_group,
-            season_id: record.season.id,
-            season_start_year: record.season.start_year,
-            season_end_year: record.season.end_year,
-            season_name: record.season.name,
-            name: record.name,
-          });
-        });
-
-        // Append rows to the competition editions table
-        table.appendRows(competitionEditionsTableData);
-        doneCallback();
-      },
-      error: function (xhr, textStatus, errorThrown) {
-        console.error(
-          "Error while fetching competition editions data: " + textStatus,
-          errorThrown
-        );
-        tableau.abortWithError(
-          "Failed to get competition editions data from SkillCorner API"
-        );
-      },
-    });
-  }
-
+  // Register the connector with Tableau
   tableau.registerConnector(myConnector);
 
-  // Create event listeners for when the user submits the form
+  // jQuery function to handle the submit button click event
   $(document).ready(function () {
-    $("#getData").click(function () {
-      // Get the parameter values from the input fields and store them in an object
-      var parameterValues = {
-        season: $("#season").val().trim(),
-        competition: $("#competition").val().trim(),
-        match: $("#match").val().trim(),
-        team: $("#team").val().trim(),
+    $("#submitButton").click(function () {
+      var connectionData = {
+        parameters: {
+          season: $("#season-parameter").val().trim(),
+          competition: $("#competition-parameter").val().trim(),
+          match: $("#match-parameter").val().trim(),
+          team: $("#team-parameter").val().trim(),
+          competition_edition: $("#competition_edition-parameter").val().trim(),
+        },
       };
 
-      // Validate the parameter values if needed
-
-      // Get the token value
-      var token = $("#token").val().trim();
-
-      // Set tableau.connectionData to include both parameter values and token
-      tableau.connectionData = JSON.stringify({
-        parameters: parameterValues,
-        token: token,
-      });
-
-      // Set the connection name
-      tableau.connectionName = "SkillCorner Data";
-
-      // Submit the connector object to Tableau
+      tableau.connectionData = JSON.stringify(connectionData);
+      tableau.connectionName = "SkillCorner WDC";
       tableau.submit();
     });
+  });
+
+  // Initiate the Tableau connector
+  $(document).ready(function () {
+    tableau.initCallback();
   });
 })();
